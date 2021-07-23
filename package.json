@@ -1,27 +1,32 @@
 {
-  "name": "x-events",
+  "name": "cross-context-events",
   "version": "0.1.0",
   "description": "A package",
-  "main": "src/index.ts",
+  "main": "dist/cross-context-events.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.js",
+  "type": "module",
   "scripts": {
     "test": "mochapack --require tests/setup.js --webpack-config webpack.test.js tests/*.spec.ts --reporter nyan",
     "test:watch": "mochapack --require tests/setup.js --webpack-config webpack.test.js tests/*.spec.ts --watch",
     "lint": "eslint . --ext .ts,.js",
-    "lint:fix": "yarn lint --fix"
+    "lint:fix": "yarn lint --fix",
+    "prepack": "rm -r dist && yarn lint:fix && webpack -c webpack.config.js && tsc"
   },
+  "files": ["dist/","src/"],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/mia1024/x-events.git"
+    "url": "git+ssh://git@github.com/mia1024/cross-context-events.git"
   },
   "keywords": [
-    "event"
+    "event","events"
   ],
   "author": "Mia Wang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mia1024/x-events/issues"
+    "url": "https://github.com/mia1024/cross-context-events/issues"
   },
-  "homepage": "https://github.com/mia1024/x-events#readme",
+  "homepage": "https://github.com/mia1024/cross-context-events",
   "devDependencies": {
     "@types/mocha": "8",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
