@@ -1,9 +1,9 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es6",
+    "module": "es6",
     "sourceMap": true,
-    "module": "esnext",
     "removeComments": true,
     "esModuleInterop": true,
     "strict": true,
@@ -14,9 +14,9 @@
     "jsx": "preserve",
     "useDefineForClassFields": true,
     "extendedDiagnostics": true,
-    "paths": {
-      "src/*": ["src/*"],
-    },
+    "outDir": "dist",
   },
-  "include": ["src/*"],
+  "include": [
+    "src/*"
+  ]
 }
