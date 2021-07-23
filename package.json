@@ -1,0 +1,41 @@
+{
+  "name": "x-events",
+  "version": "0.1.0",
+  "description": "A package",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "mochapack --require tests/setup.js --webpack-config webpack.test.js tests/*.spec.ts --reporter nyan",
+    "test:watch": "mochapack --require tests/setup.js --webpack-config webpack.test.js tests/*.spec.ts --watch",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "yarn lint --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mia1024/x-events.git"
+  },
+  "keywords": [
+    "event"
+  ],
+  "author": "Mia Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mia1024/x-events/issues"
+  },
+  "homepage": "https://github.com/mia1024/x-events#readme",
+  "devDependencies": {
+    "@types/mocha": "8",
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "eslint": "^7.31.0",
+    "expect": "^27.0.6",
+    "jsdom": "^16.6.0",
+    "jsdom-global": "^3.0.2",
+    "mocha": "8",
+    "mochapack": "^2.1.2",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.5",
+    "webpack": "^5.45.1",
+    "webpack-cli": "^4.7.2",
+    "webpack-node-externals": "^3.0.0"
+  }
+}
