@@ -12,13 +12,17 @@
     "lint:fix": "yarn lint --fix",
     "prepack": "rm -rf dist && yarn lint:fix && yarn test && webpack -c webpack.config.js && tsc"
   },
-  "files": ["dist/","src/"],
+  "files": [
+    "dist/",
+    "src/"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/mia1024/cross-context-events.git"
   },
   "keywords": [
-    "event","events"
+    "event",
+    "events"
   ],
   "author": "Mia Celeste",
   "license": "MIT",
@@ -36,6 +40,7 @@
     "jsdom-global": "^3.0.2",
     "mocha": "8",
     "mochapack": "^2.1.2",
+    "nyc": "^15.1.0",
     "ts-loader": "^9.2.3",
     "typescript": "^4.3.5",
     "webpack": "^5.45.1",
