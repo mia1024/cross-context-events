@@ -11,7 +11,7 @@
     "test:watch": "mochapack --require tests/setup.js --webpack-config webpack.test.js tests/*.spec.ts --watch",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "yarn lint --fix",
-    "prepack": "rm -r dist && yarn lint:fix && webpack -c webpack.config.js && tsc"
+    "prepack": "rm -rf dist && yarn lint:fix && webpack -c webpack.config.js && tsc"
   },
   "files": ["dist/","src/"],
   "repository": {
