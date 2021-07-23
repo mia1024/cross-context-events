@@ -64,7 +64,7 @@ function createContainer(containerName: string | null): EventContainer {
             this.data = data
         }
 
-        get type() {
+        get type(): string {
             return (this.constructor as any).type
         }
 
@@ -145,11 +145,11 @@ function createContainer(containerName: string | null): EventContainer {
             const errors: any[] = []
             let type: EventType<any> = this.constructor as EventType<any>
             let parents = type.type.substring(0, type.type.lastIndexOf("."))
-            for(;;) {
+            for (; ;) {
                 type.listeners.forEach(l => {
                         try {
                             l(this)
-                        } catch (e) {
+                        } catch (e:any) {
                             console.error(`Error in event listener for ${this.type} ${
                                 containerName === null ? "(anonymous container)" : "(container " + containerName + ")"
                             }`, e)
@@ -176,7 +176,7 @@ function createContainer(containerName: string | null): EventContainer {
 
         Object.defineProperty(E, "type", {value: type, writable: false})
         Object.defineProperty(E, "name", {
-            value: type.replace(/(?:^|\.)(\w)/gi, (p1, p2) => p2.toUpperCase()) + "Event",
+            value: type.replace(/(?:^|\.)(\w)/gi, (p1: string, p2: string) => p2.toUpperCase()) + "Event",
             writable: false
         })
         Object.defineProperty(E, "listeners", {value: new Set(), writable: false})
