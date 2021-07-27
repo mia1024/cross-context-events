@@ -1,4 +1,5 @@
 import type {EventType, EventContainer} from "./types"
+import {Transport} from "./transport";
 
 const EVENT_NAMESPACE_ROOT_EVENT_NAME = "__root__" // cannot be set through createEvent
 
@@ -53,6 +54,7 @@ function createContainer(containerName: string | null): EventContainer {
     abstract class BaseEvent<D> { // D: DataType
         data: D
         static containerName: string | null = containerName
+        static transports: Set<Transport>
 
         // implemented in createEvent through Object.defineProperty
         static listeners: Set<BaseEventListener<any>>
@@ -140,16 +142,29 @@ function createContainer(containerName: string | null): EventContainer {
             } while (stems.length > 0)
         }
 
+        static addTransport(transport: Transport) {
+            if (containerName === null) throw Error("Anonymous container cannot add cross context target")
+            transport.bind(this as unknown as EventType<any>)
+            if (this.transports.has(transport)) throw Error(`Transport already exists for event '${this.type}' (container '${containerName}')`)
+            this.transports.add(transport)
+        }
 
-        emit() {
+        static removeTransport(transport: Transport) {
+            if (!this.transports.delete(transport)) throw Error(`Specified transport does not exist for event '${this.type}' (container '${containerName}')`)
+        }
+
+        emit(options={relay: false}) {
             const errors: any[] = []
             let type: EventType<any> = this.constructor as EventType<any>
             let parents = type.type.substring(0, type.type.lastIndexOf("."))
             for (; ;) {
+                type.transports.forEach(t => {
+                    t.send(this, options.relay)
+                })
                 type.listeners.forEach(l => {
                         try {
                             l(this)
-                        } catch (e:any) {
+                        } catch (e: any) {
                             console.error(`Error in event listener for ${this.type} ${
                                 containerName === null ? "(anonymous container)" : "(container " + containerName + ")"
                             }`, e)
@@ -174,13 +189,14 @@ function createContainer(containerName: string | null): EventContainer {
             declare static container: EventContainer
         }
 
-        Object.defineProperty(E, "type", {value: type, writable: false})
+        Object.defineProperty(E, "type", {value: type, writable: false, configurable: false})
         Object.defineProperty(E, "name", {
             value: type.replace(/(?:^|\.)(\w)/gi, (p1: string, p2: string) => p2.toUpperCase()) + "Event",
-            writable: false
+            writable: false, configurable: false
         })
-        Object.defineProperty(E, "listeners", {value: new Set(), writable: false})
-        Object.defineProperty(E, "container", {value: container, writable: false})
+        Object.defineProperty(E, "listeners", {value: new Set(), writable: false, configurable: false})
+        Object.defineProperty(E, "transports", {value: new Set(), writable: false, configurable: false})
+        Object.defineProperty(E, "container", {value: container, writable: false, configurable: false})
         return E
     }
 
