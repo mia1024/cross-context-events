@@ -4,6 +4,7 @@ type EventListener<Data> = (event: Event<Data>) => void
 
 interface Event<Data> {
     data: Data
+    id:string
     listeners: Set<EventListener<Data>>
     type: string
     emit: (options?: {
@@ -34,25 +35,6 @@ interface EventContainer {
     getEvent<Data = any>(type: string): EventType<Data> | undefined
 }
 
-interface TransportInit {
-    recving: (listener: (e: { data: TransportData }) => void) => void
-    sending: (data: TransportData) => void
-}
 
-/* This object uses one letter names in the hope to save some bandwidth
- * e - event. always 'x'. used for identify data for this package.
- * c - container name. string.
- * t - type name, string.
- * d - data. any.
- */
-interface TransportData {
-    e: "x" // event: cross context
-    c: string // container: name
-    t: string // type: name
-    d: any // data
-    r: boolean// relay
-}
-
-
-export type {EventListener, Event, EventType, EventContainer, TransportData, TransportInit}
+export type {EventListener, Event, EventType, EventContainer}
 

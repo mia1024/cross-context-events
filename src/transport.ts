@@ -1,13 +1,28 @@
-import type {Event, EventType, TransportData, TransportInit} from "./types";
+import type {Event, EventType} from "./event_types";
 
-// from https://github.com/purposeindustries/window-or-global
-const GLOBAL = (typeof self === 'object' && self.self === self && self) ||
-    (typeof global === 'object' && global.global === global && global) ||
-    this
+interface TransportInit {
+    recving: (callback: ( data: TransportData ) => void) => void
+    sending: (data: TransportData) => void
+}
+
+/* This object uses one letter names in the hope to save some bandwidth
+ * e - event. always 'x'. used for identify data for this package.
+ * c - container name. string.
+ * t - type name, string.
+ * d - data. any.
+ */
+interface TransportData {
+    e: "x" // event: cross context
+    c: string // container: name
+    t: string // type: name
+    d: any // data
+    r: boolean// relay
+}
+
 
 class Transport {
 
-    private readonly recvingFunc: (listener: (e: { data: TransportData }) => void) => void
+    private readonly recvingFunc: (callback: (data: TransportData) => void) => void
     private readonly sendingFunc: (data: TransportData) => void
 
     constructor(init: TransportInit) {
@@ -23,8 +38,7 @@ class Transport {
             throw Error("Anonymous containers cannot bind to cross context transport")
         }
 
-        this.recvingFunc((e) => {
-            const data = e.data
+        this.recvingFunc((data) => {
             if (data.e !== "x" || data.c !== container || data.t !== type) return
             new Event(data.d).emit({
                 relay: data.r
@@ -32,27 +46,45 @@ class Transport {
         })
     }
 
-    send(e: Event<any>,relay:boolean) {
+    // send the events to all listeners of the transport, excluding self
+    send(e: Event<any>, relay: boolean) {
         this.sendingFunc(
             {
                 c: (e.constructor as EventType<any>).containerName!,
                 d: e.data,
                 e: "x",
-                r: relay ,
+                r: relay,
                 t: e.type
             }
         )
     }
 }
 
-const WINDOW_TRANSPORT = new Transport({
-    recving(listener) {
-        if (!GLOBAL) throw Error("Cannot find global object (window)")
-        GLOBAL.addEventListener("message", listener)
-    }, sending(data) {
-        if (!GLOBAL) throw Error("Cannot find global object (window)")
-        GLOBAL.postMessage(data, window.location.origin)
-    }
-})
+type WindowTransportOptions = {
+    target: Window
+}
 
-export {WINDOW_TRANSPORT, Transport}
+type DefaultTransportOptions = {
+    type: 'window'
+    options: WindowTransportOptions
+}
+
+function createDefaultTransport(transportOptions: DefaultTransportOptions) {
+    let {type, options} = transportOptions
+    switch (type) {
+        case "window":
+            const target = options.target
+            return new Transport({
+                recving(callback) {
+                    target.addEventListener("message", e => callback(e.data))
+                }, sending(data) {
+                    target.postMessage(data, target.location.origin)
+                }
+            })
+        default:
+            throw Error("Unsupported default transport")
+    }
+}
+
+export {createDefaultTransport, Transport}
+export type {WindowTransportOptions, DefaultTransportOptions, TransportInit, TransportData}
