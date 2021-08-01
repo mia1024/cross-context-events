@@ -1,5 +1,6 @@
-import type {EventType, EventContainer} from "./types"
+import type {EventType, EventContainer} from "./event_types"
 import {Transport} from "./transport";
+import {uuid4} from "./uuid";
 
 const EVENT_NAMESPACE_ROOT_EVENT_NAME = "__root__" // cannot be set through createEvent
 
@@ -33,6 +34,8 @@ const createdContainers = new Set<string>()
  */
 function createContainer(containerName: string | null): EventContainer {
 
+    const transports = new Set<Transport>()
+
     if (containerName !== null) {
         if (createdContainers.has(containerName)) {
             throw Error(`A container with name '${containerName}' already exists`)
@@ -53,6 +56,7 @@ function createContainer(containerName: string | null): EventContainer {
 
     abstract class BaseEvent<D> { // D: DataType
         data: D
+        id: string
         static containerName: string | null = containerName
         static transports: Set<Transport>
 
@@ -62,8 +66,9 @@ function createContainer(containerName: string | null): EventContainer {
 
         private static registeredTypes: EventNamespace = new Map();
 
-        constructor(data: D) {
+        constructor(data: D, id?: string) {
             this.data = data
+            this.id = id === undefined ? uuid4() : id
         }
 
         get type(): string {
@@ -153,15 +158,17 @@ function createContainer(containerName: string | null): EventContainer {
             if (!this.transports.delete(transport)) throw Error(`Specified transport does not exist for event '${this.type}' (container '${containerName}')`)
         }
 
-        emit(options={relay: false}) {
+        emit(options = {relay: false}) {
             const errors: any[] = []
             let type: EventType<any> = this.constructor as EventType<any>
             let parents = type.type.substring(0, type.type.lastIndexOf("."))
             for (; ;) {
-                type.transports.forEach(t => {
-                    t.send(this, options.relay)
-                })
-                type.listeners.forEach(l => {
+                if (options.relay) {
+                    type.transports.forEach(t => {
+                        t.send(this, true)
+                    })
+                }
+                type.listeners.forEach((l) => {
                         try {
                             l(this)
                         } catch (e: any) {
@@ -183,6 +190,8 @@ function createContainer(containerName: string | null): EventContainer {
         }
     }
 
+    // a helper function to create events, primarily used in BaseEvent.registerTypes
+    // to create types recursively without having to invoke all the checking mechanisms again
     function createEventUnchecked<Data>(type: string): EventType<Data> {
         class E extends BaseEvent<Data> {
             declare static type: string // assigned using Object.defineProperty below()
@@ -197,6 +206,7 @@ function createContainer(containerName: string | null): EventContainer {
         Object.defineProperty(E, "listeners", {value: new Set(), writable: false, configurable: false})
         Object.defineProperty(E, "transports", {value: new Set(), writable: false, configurable: false})
         Object.defineProperty(E, "container", {value: container, writable: false, configurable: false})
+        transports.forEach(t => t.bind(E))
         return E
     }
 
@@ -228,8 +238,15 @@ function createContainer(containerName: string | null): EventContainer {
         return BaseEvent.getRegisteredType(type) as EventType<Data>
     }
 
+    function addTransport(transport: Transport) {
+        if (transports.has(transport)) throw Error("Transport already exists")
+        transports.add(transport)
+        // i'm actually not sure if it will be more efficient to add a ton of listeners to transport
+        // or have one listener bind to the container and use getEvent instead. i assume my implementation
+        // should be significantly less performant than native implementation which the IPC channels use
+    }
 
-    const container = {createEvent, getEvent}
+    const container = {createEvent, getEvent, addTransport} // bound to a const so it can be access within closure of events
     return container
 }
 
