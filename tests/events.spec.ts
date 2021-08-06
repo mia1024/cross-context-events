@@ -267,7 +267,41 @@ describe("core/events.ts", () => {
 
         new ETest().emit()
         expect(count).toEqual(10)
-
     })
 
+    it("turns bubbling off", () => {
+        const {createEvent, getEvent} = createContainer(null)
+        let EBubble = createEvent<void>("test.event.bubble")
+        let EEvent = getEvent<void>("test.event")
+        let ETest = getEvent<void>("test")
+
+        expect(EBubble).toBeDefined()
+        expect(EEvent).toBeDefined()
+        expect(ETest).toBeDefined()
+
+        EBubble = EBubble as EventType<void>
+        EEvent = EEvent as EventType<void>
+        ETest = ETest as EventType<void>
+        let count = 0
+
+        function listener() {
+            count++
+        }
+
+        EBubble.addListener(listener)
+        EEvent.addListener(listener)
+        ETest.addListener(listener)
+
+        new EBubble().emit({bubble:false})
+        expect(count).toEqual(1)
+
+        new EEvent().emit()
+        expect(count).toEqual(3)
+
+        new EEvent().emit({bubble:false})
+        expect(count).toEqual(4)
+
+        new ETest().emit()
+        expect(count).toEqual(5)
+    })
 })

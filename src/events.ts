@@ -1,4 +1,4 @@
-import type {EventType, EventContainer} from "./event_types"
+import type {EventType, EventContainer, EmitOptions} from "./event_types"
 import {Transport} from "./transport";
 import {uuid4} from "./uuid";
 
@@ -158,10 +158,18 @@ function createContainer(containerName: string | null): EventContainer {
             if (!this.transports.delete(transport)) throw Error(`Specified transport does not exist for event '${this.type}' (container '${containerName}')`)
         }
 
-        emit(options = {relay: false}) {
+        emit(options: EmitOptions = {relay: false, bubble: true}) {
+            if (options.bubble === undefined) options.bubble = true
+            if (options.relay === undefined) options.relay = false
+
             const errors: any[] = []
             let type: EventType<any> = this.constructor as EventType<any>
-            let parents = type.type.substring(0, type.type.lastIndexOf("."))
+            let parents: string;
+            if (options.bubble)
+                parents = type.type.substring(0, type.type.lastIndexOf("."))
+            else
+                parents = ""
+
             for (; ;) {
                 if (options.relay) {
                     type.transports.forEach(t => {

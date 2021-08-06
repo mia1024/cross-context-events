@@ -26,7 +26,8 @@ the option to send and receive events across JS execution context.
     - All core functions are unittested
 - Namespaced events and bubbling
     - If you emit an event for `event.context.new`, then listeners for 
-      `event.context` and `event` are also notified (but `event.context2` is not).
+      `event.context` and `event` are also notified (but `event.context2` is not). 
+      This behavior can be disabled if desired.
       
 ## Why (a.k.a the problems)
 
