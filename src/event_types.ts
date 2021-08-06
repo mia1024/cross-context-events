@@ -1,15 +1,17 @@
 import {Transport} from "./transport";
 
 type EventListener<Data> = (event: Event<Data>) => void
+export type EmitOptions={
+    relay?: boolean,
+    bubble?: boolean
+}
 
 interface Event<Data> {
     data: Data
     id:string
     listeners: Set<EventListener<Data>>
     type: string
-    emit: (options?: {
-        relay: boolean
-    }) => void
+    emit: (options?: EmitOptions) => void
 }
 
 interface EventType<Data> {
