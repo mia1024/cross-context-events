@@ -19,17 +19,21 @@ interface TransportData {
     t: string // type: name
     d: any // data
     r: boolean// relay
+    i: string //id
 }
 
+const eventsSeen = new Set<string>()
 
 class Transport {
 
     private readonly recvingFunc: (callback: (data: TransportData) => void) => void
     private readonly sendingFunc: (data: TransportData) => void
+    private readonly targetContainerName: string | undefined
 
-    constructor(init: TransportInit) {
+    constructor(init: TransportInit, targetContainerName?: string) {
         this.recvingFunc = init.recving
         this.sendingFunc = init.sending
+        this.targetContainerName = targetContainerName
     }
 
     bind(Event: EventType<any>): void {
@@ -41,8 +45,9 @@ class Transport {
         }
 
         this.recvingFunc((data) => {
-            if (data.e !== "x" || data.c !== container || data.t !== type) return
-            new Event(data.d).emit({
+            if (data.e !== "x" || data.c !== container || data.t !== type || eventsSeen.has(data.i)) return
+            eventsSeen.add(data.i)
+            new Event(data.d, data.i).emit({
                 relay: data.r
             })
         })
@@ -52,11 +57,12 @@ class Transport {
     send(e: Event<any>, relay: boolean): void {
         this.sendingFunc(
             {
-                c: (e.constructor as EventType<any>).containerName!,
+                c: this.targetContainerName || (e.constructor as EventType<any>).containerName!,
                 d: e.data,
                 e: "x",
                 r: relay,
-                t: e.type
+                t: e.type,
+                i: e.id
             }
         )
     }
@@ -84,7 +90,7 @@ type RuntimeTransportOptions = {
 
 type SubprocessTransportOptions = {
     type: "subprocess"
-    target: ChildProcess
+    target: ChildProcess | NodeJS.Process
 }
 
 

@@ -2,7 +2,7 @@
   "compileOnSave": true,
   "compilerOptions": {
     "target": "es6",
-    "module": "es6",
+    "module": "commonjs",
     "sourceMap": true,
     "removeComments": true,
     "esModuleInterop": true,

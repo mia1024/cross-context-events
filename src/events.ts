@@ -191,11 +191,11 @@ function createContainer(containerName: string | null): EventContainer {
                 parents = ""
 
             for (; ;) {
-                if (options.relay) {
+                // if (options.relay) {
                     type.transports.forEach(t => {
                         t.send(this, true)
                     })
-                }
+                // }
                 type.listeners.forEach((l) => {
                         try {
                             l(this)
@@ -268,6 +268,7 @@ function createContainer(containerName: string | null): EventContainer {
     }
 
     function addTransport(transport: Transport) {
+        if (containerName === null) throw Error("Anonymous containers can't bind to transports")
         if (transports.has(transport)) throw Error("Transport already exists")
         transports.add(transport)
         // i'm actually not sure if it will be more efficient to add a ton of listeners to transport

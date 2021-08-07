@@ -11,6 +11,9 @@ module.exports = {
             },
         ]
     },
+    entry: {
+        processTransport: path.resolve(__dirname,"tests/processTransport.ts") // mochapack doesn't actually read this so it's fine
+    },
     output: {
         filename: "[name].js",
         path: path.resolve(__dirname, "dist"),
