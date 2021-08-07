@@ -1,4 +1,4 @@
-import type {EventType, EventContainer, EmitOptions} from "./event_types"
+import type {EventType, EventContainer, EmitOptions, Event} from "./event_types"
 import {Transport} from "./transport"
 import {uuid4} from "./uuid"
 
@@ -75,6 +75,10 @@ function createContainer(containerName: string | null): EventContainer {
             return (this.constructor as any).type
         }
 
+        get typeClass(): EventType<D> {
+            return this.constructor as EventType<D>
+        }
+
         get listeners(): Set<BaseEventListener<D>> {
             // the as any cast is the only way to get prototype
             return (this.constructor as any).listeners
@@ -93,6 +97,22 @@ function createContainer(containerName: string | null): EventContainer {
                 throw Error("The listener to remove was not found on " + this.type)
             }
             return this as unknown as EventType<Data>
+        }
+
+        static once<Data>(listener: BaseEventListener<Data>): EventType<Data> {
+            const wrapped = (event: BaseEvent<any>) => { // using arrow function because this
+                this.removeListener(wrapped) // remove first to avoid weird race condition in listener
+                listener(event)
+            }
+
+            this.listeners.add(wrapped)
+            return this as unknown as EventType<Data>
+        }
+
+        static wait(): Promise<Event<any>> {
+            return new Promise<Event<any>>(resolve => {
+                this.once(e => resolve(e))
+            })
         }
 
         static createEventNamespaces(stems: Array<string>, namespace: EventNamespace, created: string): EventNamespace {
@@ -198,12 +218,13 @@ function createContainer(containerName: string | null): EventContainer {
         }
     }
 
-    // a helper function to create events, primarily used in BaseEvent.registerTypes
-    // to create types recursively without having to invoke all the checking mechanisms again
+// a helper function to create events, primarily used in BaseEvent.registerTypes
+// to create types recursively without having to invoke all the checking mechanisms again
     function createEventUnchecked<Data>(type: string): EventType<Data> {
         class E extends BaseEvent<Data> {
             declare static type: string // assigned using Object.defineProperty below()
             declare static container: EventContainer
+            declare static wait: ()=>Promise<Event<Data>>
         }
 
         Object.defineProperty(E, "type", {value: type, writable: false, configurable: false})
