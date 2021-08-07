@@ -1,6 +1,6 @@
 const expect = require("expect") // using require so my IDE is not mad at me
 import {createContainer, createEvent, createSimpleEvent, getEvent} from "../src"
-import type {Event, EventType} from "../src";
+import type {Event, EventType} from "../src"
 
 describe("core/events.ts", () => {
     it("has the same class and instance listeners", () => {
