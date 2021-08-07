@@ -12,7 +12,7 @@ module.exports = {
         node: true,
         browser: true
     },
-    "ignorePatterns": ["dist/**/*.js"],
+    "ignorePatterns": ["dist/**/*.*"],
     rules: {
         eqeqeq: "warn",
         "@typescript-eslint/no-explicit-any": "off",

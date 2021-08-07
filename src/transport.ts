@@ -32,7 +32,7 @@ class Transport {
         this.sendingFunc = init.sending
     }
 
-    bind(Event: EventType<any>) {
+    bind(Event: EventType<any>):void {
         const type = Event.type
         const container = Event.containerName
 
@@ -49,7 +49,7 @@ class Transport {
     }
 
     // send the events to all listeners of the transport, excluding self
-    send(e: Event<any>, relay: boolean) {
+    send(e: Event<any>, relay: boolean):void {
         this.sendingFunc(
             {
                 c: (e.constructor as EventType<any>).containerName!,
@@ -89,7 +89,7 @@ type DefaultTransportOptions =
     | WorkerTransportOptions
     | RuntimeTransportOptions
 
-function createDefaultTransport(transportOptions: DefaultTransportOptions) {
+function createDefaultTransport(transportOptions: DefaultTransportOptions):Transport {
     const {type, target} = transportOptions
     switch (type) {
         case "window":
