@@ -1,5 +1,6 @@
 const expect = require("expect") // using require so my IDE is not mad at me
-import {createContainer, createEvent, createSimpleEvent, getEvent, EventType} from "../src"
+import {createContainer, createEvent, createSimpleEvent, getEvent} from "../src"
+import type {Event, EventType} from "../src";
 
 describe("core/events.ts", () => {
     it("has the same class and instance listeners", () => {
@@ -8,6 +9,13 @@ describe("core/events.ts", () => {
         expect(e.listeners).toBeDefined()
         expect(e.listeners).toBe(E.listeners)
         expect(e.listeners.constructor.name).toBe("Set")
+    })
+
+    it("returns correct type class", () => {
+        const Event = createSimpleEvent("test.type.class")
+        const e = new Event()
+        expect(e.typeClass).toBe(Event)
+        expect(e.type).toEqual(Event.type)
     })
 
     it("produces correct classes from createSimpleEvent()", () => {
@@ -292,16 +300,53 @@ describe("core/events.ts", () => {
         EEvent.addListener(listener)
         ETest.addListener(listener)
 
-        new EBubble().emit({bubble:false})
+        new EBubble().emit({bubble: false})
         expect(count).toEqual(1)
 
         new EEvent().emit()
         expect(count).toEqual(3)
 
-        new EEvent().emit({bubble:false})
+        new EEvent().emit({bubble: false})
         expect(count).toEqual(4)
 
         new ETest().emit()
         expect(count).toEqual(5)
+    })
+
+    it("emits once listener only once", () => {
+        const {createEvent} = createContainer(null)
+        const E = createEvent<number>("test.event")
+        let c = 0
+
+        function listener(e: Event<number>) {
+            c += e.data
+        }
+
+        E.once(listener)
+        const n = Math.random()
+        const e = new E(n)
+        e.emit()
+        expect(c).toEqual(n)
+        e.emit()
+        expect(c).toEqual(n)
+        e.emit()
+        expect(c).toEqual(n)
+    })
+
+    it("waits for event", async () => {
+        const {createEvent} = createContainer(null)
+        const E = createEvent<number>("test.event")
+        let n = Math.random()
+
+        const wait = E.wait()
+        new E(n).emit()
+        expect((await wait).data).toEqual(n)
+
+
+        n = Math.random()
+        setTimeout(() => {
+            new E(n).emit()
+        }, Math.random() * 10 + 1)
+        expect((await E.wait()).data).toEqual(n)
     })
 })
