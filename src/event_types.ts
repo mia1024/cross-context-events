@@ -1,4 +1,4 @@
-import {Transport} from "./transport"
+import {Transport} from "./transports"
 
 type EventListener<Data> = (event: Event<Data>) => void
 export type EmitOptions={

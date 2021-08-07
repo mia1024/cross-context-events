@@ -1,4 +1,4 @@
-const expect = require("expect") // using require so my IDE is not mad at me
+import expect from "expect"
 import {createContainer, createEvent, createSimpleEvent, getEvent} from "../src"
 import type {Event, EventType} from "../src"
 
