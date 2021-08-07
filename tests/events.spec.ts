@@ -2,7 +2,7 @@ import expect from "expect"
 import {createContainer, createEvent, createSimpleEvent, getEvent} from "../src"
 import type {Event, EventType} from "../src"
 
-describe("core/events.ts", () => {
+describe("events.ts", () => {
     it("has the same class and instance listeners", () => {
         const E = createEvent<void>("base")
         const e = new E()

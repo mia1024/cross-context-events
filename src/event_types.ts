@@ -16,7 +16,7 @@ interface Event<Data> {
 }
 
 interface EventType<Data> {
-    new(data: Data): Event<Data>
+    new(data: Data, id?:string): Event<Data>
 
     container: EventContainer
     containerName: string | null
@@ -36,7 +36,7 @@ interface EventType<Data> {
 
 interface EventContainer {
     createEvent<Data>(type: string, errorIfExists?: boolean): EventType<Data>
-
+    addTransport(transport:Transport):void
     getEvent<Data = any>(type: string): EventType<Data> | undefined
 }
 
