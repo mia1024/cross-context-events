@@ -1,6 +1,6 @@
 import type {EventType, EventContainer, EmitOptions} from "./event_types"
-import {Transport} from "./transport";
-import {uuid4} from "./uuid";
+import {Transport} from "./transport"
+import {uuid4} from "./uuid"
 
 const EVENT_NAMESPACE_ROOT_EVENT_NAME = "__root__" // cannot be set through createEvent
 
@@ -164,7 +164,7 @@ function createContainer(containerName: string | null): EventContainer {
 
             const errors: any[] = []
             let type: EventType<any> = this.constructor as EventType<any>
-            let parents: string;
+            let parents: string
             if (options.bubble)
                 parents = type.type.substring(0, type.type.lastIndexOf("."))
             else

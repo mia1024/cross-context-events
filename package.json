@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/mia1024/cross-context-events",
   "devDependencies": {
+    "@types/chrome": "^0.0.154",
     "@types/mocha": "8",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "@typescript-eslint/parser": "^4.28.4",
