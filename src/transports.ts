@@ -1,5 +1,5 @@
 /// <reference types="chrome" />
-
+import type {ChildProcess} from "child_process"
 import type {Event, EventType} from "./event_types"
 
 interface TransportInit {
@@ -32,7 +32,7 @@ class Transport {
         this.sendingFunc = init.sending
     }
 
-    bind(Event: EventType<any>):void {
+    bind(Event: EventType<any>): void {
         const type = Event.type
         const container = Event.containerName
 
@@ -49,7 +49,7 @@ class Transport {
     }
 
     // send the events to all listeners of the transport, excluding self
-    send(e: Event<any>, relay: boolean):void {
+    send(e: Event<any>, relay: boolean): void {
         this.sendingFunc(
             {
                 c: (e.constructor as EventType<any>).containerName!,
@@ -82,30 +82,36 @@ type RuntimeTransportOptions = {
     target?: string
 }
 
+type SubprocessTransportOptions = {
+    type: "subprocess"
+    target: ChildProcess
+}
+
 
 type DefaultTransportOptions =
     WindowTransportOptions
     | IFrameTransportOptions
     | WorkerTransportOptions
     | RuntimeTransportOptions
+    | SubprocessTransportOptions
 
-function createDefaultTransport(transportOptions: DefaultTransportOptions):Transport {
+function createDefaultTransport(transportOptions: DefaultTransportOptions): Transport {
     const {type, target} = transportOptions
     switch (type) {
         case "window":
         case "frame":
             return new Transport({
-                recving(callback) {
+                recving(callback: (data: TransportData) => void) {
                     (target as Window).addEventListener("message", e => callback(e.data))
-                }, sending(data) {
+                }, sending(data: TransportData) {
                     (target as Window).postMessage(data, (target as Window).location.origin)
                 }
             })
         case "worker":
             return new Transport({
-                recving(callback) {
+                recving(callback: (data: TransportData) => void) {
                     (target as Worker).addEventListener("message", e => callback(e.data))
-                }, sending(data) {
+                }, sending(data: TransportData) {
                     (target as Worker).postMessage(data)
                 }
             })
@@ -113,20 +119,29 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions):Trans
             // this uses chrome because both chrome and firefox supports the chrome namespace
             if (target)
                 return new Transport({
-                    recving(callback) {
-                        chrome.runtime.onMessageExternal.addListener(message => callback(message))
-                    }, sending(data) {
+                    recving(callback: (data: TransportData) => void) {
+                        chrome.runtime.onMessageExternal.addListener(callback)
+                    }, sending(data: TransportData) {
                         chrome.runtime.sendMessage(target as string, data)
                     }
                 })
             else
                 return new Transport({
-                    recving(callback) {
-                        chrome.runtime.onMessage.addListener(message => callback(message))
+                    recving(callback: (data: TransportData) => void) {
+                        chrome.runtime.onMessage.addListener(callback)
                     }, sending(data) {
                         chrome.runtime.sendMessage(data)
                     }
                 })
+        case "subprocess":
+            return new Transport({
+                recving(callback: (data: TransportData) => void) {
+                    const events = require("events")
+                    events.addListener("message", callback)
+                }, sending(data: TransportData) {
+                    (target as ChildProcess).send(data)
+                }
+            })
         default:
             throw Error("Unsupported default transport")
     }
