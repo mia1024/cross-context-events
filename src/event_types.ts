@@ -11,6 +11,7 @@ interface Event<Data> {
     id:string
     listeners: Set<EventListener<Data>>
     type: string
+    typeClass: EventType<Data>
     emit: (options?: EmitOptions) => void
 }
 
@@ -23,6 +24,8 @@ interface EventType<Data> {
     listeners: Set<EventListener<Data>>
     addListener(listener: EventListener<Data>): EventType<Data>
     removeListener(listener: EventListener<Data>): EventType<Data>
+    once(listener: EventListener<Data>): EventType<Data>
+    wait: ()=>Promise<Event<Data>>
 
     transports: Set<Transport>
     addTransport:(transport:Transport)=>void
