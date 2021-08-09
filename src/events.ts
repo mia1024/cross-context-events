@@ -1,7 +1,7 @@
 import type {EventType, EventContainer, EmitOptions, Event} from "./event_types"
 import {Transport} from "./transports"
 import {uuid4} from "./uuid"
-import {glob} from "mochapack/lib/util/glob";
+import {glob} from "mochapack/lib/util/glob"
 
 const EVENT_NAMESPACE_ROOT_EVENT_NAME = "__root__" // cannot be set through createEvent
 
