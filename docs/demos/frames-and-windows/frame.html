@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Frames and Windows Demo</title>
+    <script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
+    <style>
+        body {
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+<p id="frame-name">
+
+</p>
+<div style="margin: 0.5em">
+    <input type="text" name="message" id="message" placeholder="say something">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="createWindow()">New window</button>
+</div>
+<p>
+    <span id="message-display" style="padding:16px;"></span>
+</p>
+
+<script type="text/javascript" src="common.js"></script>
+<script>
+    document.getElementById("frame-name").innerText = window.name
+</script>
+</body>
+</html>
