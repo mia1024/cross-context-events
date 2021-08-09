@@ -60,7 +60,7 @@ class Transport {
         })
     }
 
-    bindGlobal(containers: Map<string, EventContainer>) {
+    bindGlobal(containers: Map<string, EventContainer>):void {
         this.recvingFunc((data: TransportData) => {
             if (data.e !== "x" || eventsSeen.has(data.i)) return
             const container = containers.get(data.c)
@@ -82,7 +82,7 @@ class Transport {
         })
     }
 
-    bindContainer(container: EventContainer) {
+    bindContainer(container: EventContainer):void {
         if (container.name === null) throw Error("Anonymous containers cannot bind to transports")
         this.recvingFunc((data: TransportData) => {
             if (data.e !== "x" || data.c !== container.name || eventsSeen.has(data.i)) return

@@ -1,7 +1,6 @@
 import type {EventType, EventContainer, EmitOptions, Event} from "./event_types"
 import {Transport} from "./transports"
 import {uuid4} from "./uuid"
-import {glob} from "mochapack/lib/util/glob"
 
 const EVENT_NAMESPACE_ROOT_EVENT_NAME = "__root__" // cannot be set through createEvent
 
@@ -279,7 +278,7 @@ function createSimpleEvent(type: string, errorIfExists: boolean = true): EventTy
     return createEvent<void>(type, errorIfExists)
 }
 
-function useGlobalTransport(transport: Transport) {
+function useGlobalTransport(transport: Transport):void {
     if (globalTransports.has(transport)) throw Error("Global transport already exists")
     globalTransports.add(transport)
     transport.bindGlobal(createdContainers)

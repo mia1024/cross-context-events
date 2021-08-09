@@ -2,7 +2,7 @@ const path = require("path")
 
 module.exports = {
     mode: "production",
-    target: "node",
+    // target: "node",
     devtool: "source-map",
     module: {
         rules: [
@@ -24,7 +24,7 @@ module.exports = {
         filename: "cross-context-events.min.js",
         path: path.resolve(__dirname, "dist"),
         library: {
-            name: "cross-context-events",
+            name: "CrossContextEvents",
             type: "umd"
         }
     },
