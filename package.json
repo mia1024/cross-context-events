@@ -1,7 +1,7 @@
 {
   "name": "cross-context-events",
-  "version": "0.1.0",
-  "description": "A package",
+  "version": "0.2.0",
+  "description": "A lightweight event library for cross context messaging",
   "main": "dist/cross-context-events.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.js",
