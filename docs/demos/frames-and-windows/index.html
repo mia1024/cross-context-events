@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cross Context Events Frame Demo</title>
+    <script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
+    <style>
+        #frames {
+            display: flex;
+            align-content: space-around;
+            justify-content: space-around;
+            align-items: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            min-height: calc(100vh - 100px);
+        }
+
+        iframe {
+            display: block;
+            width: 480px;
+            height: 360px;
+            border: 1px dashed black;
+        }
+
+        a:visited {
+            color: blue
+        }
+    </style>
+</head>
+
+<p>
+    A simple demo for using <a href="https://github.com/mia1024/cross-context-events">Cross Context Events</a> in browser. Try adding a few frames and windows below and send some
+    messages :)
+</p>
+<p>
+    <a href="https://github.com/mia1024/cross-context-events/tree/main/docs/demos/frames-and-windows" target="_blank">
+        Page source </a>
+</p>
+
+<div style="padding:16px;display: flex;align-items: center">
+    <div style="margin: 0.5em">
+        <input type="text" name="message" id="message" placeholder="say something">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <button onclick="createFrame()">
+        New iframe
+    </button>
+    <button onclick="createWindow()">New window</button>
+</div>
+<p>
+    <span id="message-display" style="padding:16px;"></span>
+</p>
+
+<div id="frames"></div>
+
+<script type="text/javascript" src="common.js"></script>
+
+</html>
