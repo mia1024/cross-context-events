@@ -1,4 +1,4 @@
-export {createEvent,createSimpleEvent,createContainer, getEvent} from "./events"
+export {createEvent,createSimpleEvent,createContainer, getEvent, useGlobalTransport} from "./events"
 export {createDefaultTransport, Transport} from "./transports"
 
 export type {Event, EventType, EventListener,EventContainer} from "./event_types"
