@@ -55,6 +55,10 @@ class Transport {
         })
     }
 
+    static ignore(id:string){
+        eventsSeen.add(id)
+    }
+
     bindEvent(Event: EventType<any>): void {
         const type = Event.type
         const container = Event.containerName
@@ -104,7 +108,7 @@ class Transport {
 
     // send the events to all listeners of the transport, excluding self
     send(e: Event<any>, relay: boolean): void {
-        if (eventsSeen.has(e.id)) return
+        // if (eventsSeen.has(e.id)) return
         // eventsSeen.add(e.id)
         this.sendingFunc(
             {

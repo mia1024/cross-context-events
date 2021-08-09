@@ -176,9 +176,7 @@ function createContainer(containerName: string | null): EventContainer {
         relay(){
             containerTransports.forEach(t => t.send(this, true))
             globalTransports.forEach(t => t.send(this, true))
-            this.typeClass.transports.forEach(t => {
-                t.send(this, true)
-            })
+            this.typeClass.transports.forEach(t => t.send(this, true))
         }
 
         emit(options: EmitOptions = {relay: true, bubble: true}) {
@@ -192,9 +190,12 @@ function createContainer(containerName: string | null): EventContainer {
                 parents = type.type.substring(0, type.type.lastIndexOf("."))
             else
                 parents = ""
-            if (options.relay) {
-                this.relay()
-            }
+
+            if (options.relay) this.relay()
+
+            // if any relay creates a cycle, this will prevent the received event from being emitted
+            Transport.ignore(this.id)
+
             for (; ;) {
                 type.listeners.forEach((l) => {
                         try {
