@@ -1,4 +1,10 @@
 # Cross Context Events
+![](https://badgen.net/npm/v/cross-context-events)
+![](https://badgen.net/bundlephobia/min/cross-context-events)
+![](https://badgen.net/bundlephobia/minzip/cross-context-events)
+![](https://badgen.net/bundlephobia/dependency-count/cross-context-events)
+![](https://badgen.net/npm/types/cross-context-events)
+![](https://badgen.net/npm/license/cross-context-events)
 
 Cross context events is a robust, lightweight package providing 
 the option to send and receive events across JS execution context. 
@@ -6,8 +12,8 @@ the option to send and receive events across JS execution context.
 ## Features
 
 - Lightweight
-    - 1.12KB GZipped + minified
-    - 3.1KB Minified
+    - 2.5KB GZipped + minified
+    - 8.6KB Minified
     - No runtime dependency
 - Containerization
     - Support for named and anonymous containers to provide isolation if you need
