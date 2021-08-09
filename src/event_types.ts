@@ -11,6 +11,7 @@ interface Event<Data> {
     id:string
     listeners: Set<EventListener<Data>>
     type: string
+    relay: ()=>void
     typeClass: EventType<Data>
     emit: (options?: EmitOptions) => void
 }

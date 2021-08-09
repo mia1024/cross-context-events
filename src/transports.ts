@@ -43,6 +43,18 @@ class Transport {
         if (target.containerName) this.targetContainerName = target.containerName
     }
 
+    private static emitEvent(Event: EventType<any>, data: TransportData) {
+        const e = new Event(data.d, data.i)
+        if (data.r) {
+            e.relay()
+        }
+
+        eventsSeen.add(data.i)
+        e.emit({
+            relay: false
+        })
+    }
+
     bindEvent(Event: EventType<any>): void {
         const type = Event.type
         const container = Event.containerName
@@ -53,14 +65,11 @@ class Transport {
 
         this.recvingFunc((data) => {
             if (data.e !== "x" || data.c !== container || data.t !== type || eventsSeen.has(data.i)) return
-            eventsSeen.add(data.i)
-            new Event(data.d, data.i).emit({
-                relay: data.r
-            })
+            Transport.emitEvent(Event, data)
         })
     }
 
-    bindGlobal(containers: Map<string, EventContainer>):void {
+    bindGlobal(containers: Map<string, EventContainer>): void {
         this.recvingFunc((data: TransportData) => {
             if (data.e !== "x" || eventsSeen.has(data.i)) return
             const container = containers.get(data.c)
@@ -69,20 +78,17 @@ class Transport {
                 console.warn("Event payload", data)
                 return
             }
-            const ev = container.getEvent(data.t)
-            if (ev === undefined) {
+            const Event = container.getEvent(data.t)
+            if (Event === undefined) {
                 console.warn(`Event targeted to event type ${data.t} (container ${data.c}) is received, but no such event is found`)
                 console.warn("Event payload", data)
                 return
             }
-            eventsSeen.add(data.i)
-            new ev(data.d, data.i).emit({
-                relay: data.r
-            })
+            Transport.emitEvent(Event, data)
         })
     }
 
-    bindContainer(container: EventContainer):void {
+    bindContainer(container: EventContainer): void {
         if (container.name === null) throw Error("Anonymous containers cannot bind to transports")
         this.recvingFunc((data: TransportData) => {
             if (data.e !== "x" || data.c !== container.name || eventsSeen.has(data.i)) return
@@ -92,15 +98,14 @@ class Transport {
                 console.warn("Event payload", data)
                 return
             }
-            eventsSeen.add(data.i)
-            new Event(data.d, data.i).emit({
-                relay: data.r
-            })
+            Transport.emitEvent(Event, data)
         })
     }
 
     // send the events to all listeners of the transport, excluding self
     send(e: Event<any>, relay: boolean): void {
+        if (eventsSeen.has(e.id)) return
+        // eventsSeen.add(e.id)
         this.sendingFunc(
             {
                 c: this.targetContainerName || (e.constructor as EventType<any>).containerName!,
@@ -121,7 +126,7 @@ type WindowTransportOptions = {
 
 type IFrameTransportOptions = {
     type: "frame"
-    target: Window
+    target: HTMLIFrameElement
 }
 
 type WorkerTransportOptions = {
@@ -157,12 +162,19 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
     const {type, target} = transportOptions
     switch (type) {
         case "window":
+            return new Transport({
+                recving(callback: (data: TransportData) => void) {
+                    window.addEventListener("message", e => callback(e.data))
+                }, sending(data: TransportData) {
+                    (target as Window).postMessage(data, "*")
+                }
+            })
         case "frame":
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    (target as Window).addEventListener("message", e => callback(e.data))
+                    window.addEventListener("message", e => callback(e.data))
                 }, sending(data: TransportData) {
-                    (target as Window).postMessage(data, (target as Window).location.origin)
+                    (target as HTMLIFrameElement).contentWindow!.postMessage(data, "*")
                 }
             })
         case "worker":
@@ -212,7 +224,7 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
                 }
             })
         default:
-            throw Error("Unsupported default transport")
+            throw Error("Unsupported default transport type " + target)
     }
 }
 

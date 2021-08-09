@@ -173,9 +173,17 @@ function createContainer(containerName: string | null): EventContainer {
             this.transports.add(transport)
         }
 
-        emit(options: EmitOptions = {relay: false, bubble: true}) {
+        relay(){
+            containerTransports.forEach(t => t.send(this, true))
+            globalTransports.forEach(t => t.send(this, true))
+            this.typeClass.transports.forEach(t => {
+                t.send(this, true)
+            })
+        }
+
+        emit(options: EmitOptions = {relay: true, bubble: true}) {
             if (options.bubble === undefined) options.bubble = true
-            if (options.relay === undefined) options.relay = false
+            if (options.relay === undefined) options.relay = true
 
             const errors: any[] = []
             let type: EventType<any> = this.constructor as EventType<any>
@@ -184,12 +192,10 @@ function createContainer(containerName: string | null): EventContainer {
                 parents = type.type.substring(0, type.type.lastIndexOf("."))
             else
                 parents = ""
-            containerTransports.forEach(t => t.send(this, options.relay!))
-            globalTransports.forEach(t => t.send(this, options.relay!))
+            if (options.relay) {
+                this.relay()
+            }
             for (; ;) {
-                type.transports.forEach(t => {
-                    t.send(this, options.relay!)
-                })
                 type.listeners.forEach((l) => {
                         try {
                             l(this)
@@ -278,7 +284,7 @@ function createSimpleEvent(type: string, errorIfExists: boolean = true): EventTy
     return createEvent<void>(type, errorIfExists)
 }
 
-function useGlobalTransport(transport: Transport):void {
+function useGlobalTransport(transport: Transport): void {
     if (globalTransports.has(transport)) throw Error("Global transport already exists")
     globalTransports.add(transport)
     transport.bindGlobal(createdContainers)
