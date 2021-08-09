@@ -6,7 +6,7 @@ const transport = createDefaultTransport({
     target: process
 })
 useGlobalTransport(transport)
-let {createEvent} = createContainer("testChildProcess")
+const {createEvent} = createContainer("testChildProcess")
 const ECreate = createEvent<void>("child.created")
 const EInit = createEvent<number>("child.data.init")
 const EEcho = createEvent<number>("child.data.echo")
@@ -15,4 +15,4 @@ EInit.addListener((e: Event<number>) => {
     new EEcho(e.data).emit()
 })
 
-new ECreate().emit();
+new ECreate().emit()

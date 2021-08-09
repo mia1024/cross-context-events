@@ -63,13 +63,13 @@ class Transport {
     bindGlobal(containers: Map<string, EventContainer>) {
         this.recvingFunc((data: TransportData) => {
             if (data.e !== "x" || eventsSeen.has(data.i)) return
-            let container = containers.get(data.c)
+            const container = containers.get(data.c)
             if (container === undefined) {
                 console.warn(`Event targeted to container ${data.c} is received, but no such container is found`)
                 console.warn("Event payload", data)
                 return
             }
-            let ev = container.getEvent(data.t)
+            const ev = container.getEvent(data.t)
             if (ev === undefined) {
                 console.warn(`Event targeted to event type ${data.t} (container ${data.c}) is received, but no such event is found`)
                 console.warn("Event payload", data)
@@ -86,7 +86,7 @@ class Transport {
         if (container.name === null) throw Error("Anonymous containers cannot bind to transports")
         this.recvingFunc((data: TransportData) => {
             if (data.e !== "x" || data.c !== container.name || eventsSeen.has(data.i)) return
-            let Event = container.getEvent(data.t)
+            const Event = container.getEvent(data.t)
             if (Event === undefined) {
                 console.warn(`Event targeted to event type ${data.t} (container ${container.name}) is received, but no such event is found`)
                 console.warn("Event payload", data)
@@ -204,7 +204,7 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
                 recving(callback: (data: TransportData) => void) {
                     (target as NodeJS.Process).on("message", callback)
                 }, sending(data: TransportData) {
-                    let p = (target as NodeJS.Process)
+                    const p = (target as NodeJS.Process)
                     if (p.send === undefined)
                         throw Error("IPC channel not established. process.send is undefined")
                     else
