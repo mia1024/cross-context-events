@@ -1,10 +1,15 @@
 /// <reference types="chrome" />
 import type {ChildProcess} from "child_process"
-import type {Event, EventType} from "./event_types"
+import type {Event, EventContainer, EventType} from "./event_types"
 
 interface TransportInit {
     recving: (callback: (data: TransportData) => void) => void
     sending: (data: TransportData) => void
+}
+
+interface TransportTarget {
+    containerName?: string,
+    eventType?: string
 }
 
 /* This object uses one letter names in the hope to save some bandwidth
@@ -29,14 +34,16 @@ class Transport {
     private readonly recvingFunc: (callback: (data: TransportData) => void) => void
     private readonly sendingFunc: (data: TransportData) => void
     private readonly targetContainerName: string | undefined
+    private readonly targetEventType: string | undefined
 
-    constructor(init: TransportInit, targetContainerName?: string) {
+    constructor(init: TransportInit, target: TransportTarget = {}) {
         this.recvingFunc = init.recving
         this.sendingFunc = init.sending
-        this.targetContainerName = targetContainerName
+        if (target.eventType) this.targetEventType = target.eventType
+        if (target.containerName) this.targetContainerName = target.containerName
     }
 
-    bind(Event: EventType<any>): void {
+    bindEvent(Event: EventType<any>): void {
         const type = Event.type
         const container = Event.containerName
 
@@ -53,6 +60,45 @@ class Transport {
         })
     }
 
+    bindGlobal(containers: Map<string, EventContainer>) {
+        this.recvingFunc((data: TransportData) => {
+            if (data.e !== "x" || eventsSeen.has(data.i)) return
+            let container = containers.get(data.c)
+            if (container === undefined) {
+                console.warn(`Event targeted to container ${data.c} is received, but no such container is found`)
+                console.warn("Event payload", data)
+                return
+            }
+            let ev = container.getEvent(data.t)
+            if (ev === undefined) {
+                console.warn(`Event targeted to event type ${data.t} (container ${data.c}) is received, but no such event is found`)
+                console.warn("Event payload", data)
+                return
+            }
+            eventsSeen.add(data.i)
+            new ev(data.d, data.i).emit({
+                relay: data.r
+            })
+        })
+    }
+
+    bindContainer(container: EventContainer) {
+        if (container.name === null) throw Error("Anonymous containers cannot bind to transports")
+        this.recvingFunc((data: TransportData) => {
+            if (data.e !== "x" || data.c !== container.name || eventsSeen.has(data.i)) return
+            let Event = container.getEvent(data.t)
+            if (Event === undefined) {
+                console.warn(`Event targeted to event type ${data.t} (container ${container.name}) is received, but no such event is found`)
+                console.warn("Event payload", data)
+                return
+            }
+            eventsSeen.add(data.i)
+            new Event(data.d, data.i).emit({
+                relay: data.r
+            })
+        })
+    }
+
     // send the events to all listeners of the transport, excluding self
     send(e: Event<any>, relay: boolean): void {
         this.sendingFunc(
@@ -61,7 +107,7 @@ class Transport {
                 d: e.data,
                 e: "x",
                 r: relay,
-                t: e.type,
+                t: this.targetEventType || e.type,
                 i: e.id
             }
         )
@@ -88,9 +134,14 @@ type RuntimeTransportOptions = {
     target?: string
 }
 
-type SubprocessTransportOptions = {
-    type: "subprocess"
-    target: ChildProcess | NodeJS.Process
+type ChildProcessTransportOptions = {
+    type: "childProcess"
+    target: ChildProcess
+}
+
+type ParentProcessTransportOptions = {
+    type: "parentProcess"
+    target: NodeJS.Process
 }
 
 
@@ -99,7 +150,8 @@ type DefaultTransportOptions =
     | IFrameTransportOptions
     | WorkerTransportOptions
     | RuntimeTransportOptions
-    | SubprocessTransportOptions
+    | ChildProcessTransportOptions
+    | ParentProcessTransportOptions
 
 function createDefaultTransport(transportOptions: DefaultTransportOptions): Transport {
     const {type, target} = transportOptions
@@ -139,13 +191,24 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
                         chrome.runtime.sendMessage(data)
                     }
                 })
-        case "subprocess":
+        case "childProcess":
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    const events = require("events")
-                    events.addListener("message", callback)
+                    (target as ChildProcess).on("message", callback)
                 }, sending(data: TransportData) {
                     (target as ChildProcess).send(data)
+                }
+            })
+        case "parentProcess":
+            return new Transport({
+                recving(callback: (data: TransportData) => void) {
+                    (target as NodeJS.Process).on("message", callback)
+                }, sending(data: TransportData) {
+                    let p = (target as NodeJS.Process)
+                    if (p.send === undefined)
+                        throw Error("IPC channel not established. process.send is undefined")
+                    else
+                        p.send(data)
                 }
             })
         default:

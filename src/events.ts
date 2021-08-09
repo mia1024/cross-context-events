@@ -1,6 +1,7 @@
 import type {EventType, EventContainer, EmitOptions, Event} from "./event_types"
 import {Transport} from "./transports"
 import {uuid4} from "./uuid"
+import {glob} from "mochapack/lib/util/glob";
 
 const EVENT_NAMESPACE_ROOT_EVENT_NAME = "__root__" // cannot be set through createEvent
 
@@ -19,7 +20,8 @@ an example namespace for 'test.user.create'
 }
  */
 
-const createdContainers = new Set<string>()
+const createdContainers = new Map<string, EventContainer>()
+const globalTransports = new Set<Transport>()
 
 /** Create isolated containers. Events in different containers won't affect
  * each other even if they have the same names. Events created in one container
@@ -34,7 +36,7 @@ const createdContainers = new Set<string>()
  */
 function createContainer(containerName: string | null): EventContainer {
 
-    const transports = new Set<Transport>()
+    const containerTransports = new Set<Transport>()
 
     if (containerName !== null) {
         if (createdContainers.has(containerName)) {
@@ -47,8 +49,6 @@ function createContainer(containerName: string | null): EventContainer {
         if (containerName.match(/^[a-zA-Z]/) === null) {
             throw Error(`Container name '${containerName}' must starts with a letter`)
         }
-
-        createdContainers.add(containerName)
     }
 
     type BaseEventListener<Data> = (event: BaseEvent<Data>) => void
@@ -109,7 +109,7 @@ function createContainer(containerName: string | null): EventContainer {
             return this as unknown as EventType<Data>
         }
 
-        static wait(): Promise<Event<any>> {
+        static waitForOne(): Promise<Event<any>> {
             return new Promise<Event<any>>(resolve => {
                 this.once(e => resolve(e))
             })
@@ -169,13 +169,9 @@ function createContainer(containerName: string | null): EventContainer {
 
         static addTransport(transport: Transport) {
             if (containerName === null) throw Error("Anonymous container cannot add cross context target")
-            transport.bind(this as unknown as EventType<any>)
+            transport.bindEvent(this as unknown as EventType<any>)
             if (this.transports.has(transport)) throw Error(`Transport already exists for event '${this.type}' (container '${containerName}')`)
             this.transports.add(transport)
-        }
-
-        static removeTransport(transport: Transport) {
-            if (!this.transports.delete(transport)) throw Error(`Specified transport does not exist for event '${this.type}' (container '${containerName}')`)
         }
 
         emit(options: EmitOptions = {relay: false, bubble: true}) {
@@ -189,13 +185,12 @@ function createContainer(containerName: string | null): EventContainer {
                 parents = type.type.substring(0, type.type.lastIndexOf("."))
             else
                 parents = ""
-
+            containerTransports.forEach(t => t.send(this, options.relay!))
+            globalTransports.forEach(t => t.send(this, options.relay!))
             for (; ;) {
-                // if (options.relay) {
-                    type.transports.forEach(t => {
-                        t.send(this, true)
-                    })
-                // }
+                type.transports.forEach(t => {
+                    t.send(this, options.relay!)
+                })
                 type.listeners.forEach((l) => {
                         try {
                             l(this)
@@ -224,7 +219,7 @@ function createContainer(containerName: string | null): EventContainer {
         class E extends BaseEvent<Data> {
             declare static type: string // assigned using Object.defineProperty below()
             declare static container: EventContainer
-            declare static wait: ()=>Promise<Event<Data>>
+            declare static wait: () => Promise<Event<Data>>
         }
 
         Object.defineProperty(E, "type", {value: type, writable: false, configurable: false})
@@ -235,7 +230,6 @@ function createContainer(containerName: string | null): EventContainer {
         Object.defineProperty(E, "listeners", {value: new Set(), writable: false, configurable: false})
         Object.defineProperty(E, "transports", {value: new Set(), writable: false, configurable: false})
         Object.defineProperty(E, "container", {value: container, writable: false, configurable: false})
-        transports.forEach(t => t.bind(E))
         return E
     }
 
@@ -269,14 +263,13 @@ function createContainer(containerName: string | null): EventContainer {
 
     function addTransport(transport: Transport) {
         if (containerName === null) throw Error("Anonymous containers can't bind to transports")
-        if (transports.has(transport)) throw Error("Transport already exists")
-        transports.add(transport)
-        // i'm actually not sure if it will be more efficient to add a ton of listeners to transport
-        // or have one listener bind to the container and use getEvent instead. i assume my implementation
-        // should be significantly less performant than native implementation which the IPC channels use
+        if (containerTransports.has(transport)) throw Error("Transport already exists")
+        containerTransports.add(transport)
+        transport.bindContainer(container)
     }
 
-    const container = {createEvent, getEvent, addTransport} // bound to a const so it can be access within closure of events
+    const container = {createEvent, getEvent, addTransport, name: containerName} // bound to a const so it can be access within closure of events
+    if (containerName) createdContainers.set(containerName, container)
     return container
 }
 
@@ -286,4 +279,10 @@ function createSimpleEvent(type: string, errorIfExists: boolean = true): EventTy
     return createEvent<void>(type, errorIfExists)
 }
 
-export {createContainer, createEvent, createSimpleEvent, getEvent}
+function useGlobalTransport(transport: Transport) {
+    if (globalTransports.has(transport)) throw Error("Global transport already exists")
+    globalTransports.add(transport)
+    transport.bindGlobal(createdContainers)
+}
+
+export {createContainer, createEvent, createSimpleEvent, getEvent, useGlobalTransport}

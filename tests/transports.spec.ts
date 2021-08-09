@@ -1,7 +1,7 @@
 import expect from "expect"
 import {fork} from "child_process"
 import path from "path"
-import {Transport, createContainer, TransportData} from "../src";
+import {Transport, createContainer, TransportData, createDefaultTransport, createEvent} from "../src";
 
 describe("transports.ts", () => {
 
@@ -30,7 +30,7 @@ describe("transports.ts", () => {
             sending(data: TransportData) {
                 new TransportEvent(data).emit()
             }
-        },RecvEvent.containerName!))
+        }, {containerName: RecvEvent.containerName!}))
         RecvEvent.addTransport(new Transport({
             recving(listener: (data: TransportData) => void) {
                 TransportEvent.addListener(e => listener(e.data))
@@ -42,13 +42,31 @@ describe("transports.ts", () => {
             new EmitEvent(n)
                 .emit()
         }, 1 + Math.random() * 10)
-        let e = await RecvEvent.wait()
+        let e = await RecvEvent.waitForOne()
         expect(e.data).toEqual(n)
 
     })
 
-    it("it raises event in child correctly", () => {
-        // const child = fork(path.resolve(__dirname, "./processTransport.js"))
+    it("it raises event in child process correctly", async () => {
+        let container = createContainer("testChildProcess")
+
+        let ECreate = container.createEvent("child.created")
+        const child = fork(path.resolve(__dirname, "./processTransport.js"))
+        const transport = createDefaultTransport({
+            type: "childProcess",
+            target: child
+        })
+
+        container.addTransport(transport)
+        await ECreate.waitForOne()
+
+        let EInit = container.createEvent<number>("child.data.init")
+        let EEcho = container.createEvent<number>("child.data.echo")
+
+        let n = Math.random()
+        new EInit(n).emit()
+        let e = await EEcho.waitForOne()
+        expect(e.data).toEqual(n)
     })
 
 })

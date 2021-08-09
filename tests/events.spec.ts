@@ -338,7 +338,7 @@ describe("events.ts", () => {
         const E = createEvent<number>("test.event")
         let n = Math.random()
 
-        const wait = E.wait()
+        const wait = E.waitForOne()
         new E(n).emit()
         expect((await wait).data).toEqual(n)
 
@@ -347,6 +347,6 @@ describe("events.ts", () => {
         setTimeout(() => {
             new E(n).emit()
         }, Math.random() * 10 + 1)
-        expect((await E.wait()).data).toEqual(n)
+        expect((await E.waitForOne()).data).toEqual(n)
     })
 })
