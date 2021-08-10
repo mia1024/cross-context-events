@@ -14,7 +14,7 @@ event in your script, the same event will also be emitted in all other linked ex
 
 ![demo](docs/demos/frames-and-windows/demo.gif)
 
-[Try the demo here](https://mia1024.github.io/cross-context-events/demos/frames-and-windows/)    [Source code for the demo](https://github.com/mia1024/cross-context-events/tree/main/docs/demos/frames-and-windows)
+[Try the demo here](https://mia1024.github.io/cross-context-events/demos/frames-and-windows/)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  [Source code for the demo](https://github.com/mia1024/cross-context-events/tree/main/docs/demos/frames-and-windows)
 
 ## Documentations and getting started
 
