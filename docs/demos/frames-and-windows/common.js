@@ -49,7 +49,7 @@ function createFrame() {
 
 let initialCount = parseInt(window.location.search.substring(1)) // window
 if (Number.isNaN(initialCount)) 
-    initialCount = parseInt(window.name.substring(6)) // iframe
+    initialCount = parseInt(window.name.substring(6)) + 1 // iframe
 createFrame.frameCount = Number.isNaN(initialCount) ? 0 : initialCount
 
 function createWindow() {
