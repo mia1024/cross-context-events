@@ -9,11 +9,14 @@
 Cross context events is a robust, lightweight package providing 
 the option to send and receive events across JS execution context. 
 
+You asked, what does this mean, exactly? Well, it means that when you emit an
+event in your script, the same event will also be emitted in all other linked execution contexts (i.e. other tabs, windows, processes), even on different computers if you want to! All you need to do is writing a few lines of code to link them together. 
+
 ![demo](docs/demos/frames-and-windows/demo.gif)
 
-[Try the demo here](https://mia1024.github.io/cross-context-events/demos/frames-and-windows/)
+[Try the demo here](https://mia1024.github.io/cross-context-events/demos/frames-and-windows/)    [Source code for the demo](https://github.com/mia1024/cross-context-events/tree/main/docs/demos/frames-and-windows)
 
-## Documentations
+## Documentations and getting started
 
 See [here](https://mia1024.github.io/cross-context-events/).
 
