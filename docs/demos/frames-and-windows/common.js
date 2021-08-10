@@ -31,9 +31,7 @@ MessageEvent.addListener((event) => {
 })
 
 const NewFrameEvent = createEvent("frame.new")
-NewFrameEvent.addListener((event) => {
-    createFrame.frameCount++
-})
+NewFrameEvent.addListener(() => createFrame.frameCount++)
 
 function createFrame() {
     let frame = document.createElement("iframe")
@@ -49,7 +47,9 @@ function createFrame() {
     new NewFrameEvent().emit()
 }
 
-let initialCount = parseInt(window.location.search.substring(1))
+let initialCount = parseInt(window.location.search.substring(1)) // window
+if (Number.isNaN(initialCount)) 
+    initialCount = parseInt(window.name.substring(6)) // iframe
 createFrame.frameCount = Number.isNaN(initialCount) ? 0 : initialCount
 
 function createWindow() {
