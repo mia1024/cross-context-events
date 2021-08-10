@@ -9,12 +9,29 @@
 Cross context events is a robust, lightweight package providing 
 the option to send and receive events across JS execution context. 
 
+![demo](docs/demos/frames-and-windows/demo.gif)
+
+[Try the demo here](https://mia1024.github.io/cross-context-events/demos/frames-and-windows/)
+
+## Documentations
+
+See [here](https://mia1024.github.io/cross-context-events/).
+
+## Installation
+yarn
+```bash
+yarn add cross-context-events
+```
+
+npm
+```bash 
+npm install cross-context-events
+```
+
 ## Features
 
 - Lightweight
-    - 2.5KB GZipped + minified
-    - 8.6KB Minified
-    - No runtime dependency
+- No runtime dependency
 - Containerization
     - Support for named and anonymous containers to provide isolation if you need
 - Unified interface
@@ -35,17 +52,3 @@ the option to send and receive events across JS execution context.
       `event.context` and `event` are also notified (but `event.context2` is not). 
       This behavior can be disabled if desired.
       
-## Installation
-yarn
-```bash
-yarn add cross-context-events
-```
-
-npm
-``` 
-npm install cross-context-events
-```
-
-## Documentations
-
-See [here](https://mia1024.github.io/cross-context-events/).
