@@ -102,7 +102,8 @@ new OnlineEvent().emit()
     - Support for named and anonymous containers to provide isolation if you
       need
 - Unified interface
-    - Works the same way whether you are using browser, service worker, or node
+    - Works the same way whether you are using browser, service worker, node,
+      or electron
 - Cross Context
     - Capable of sending events across execution context (e.g. from one tab to
       another tab in browser or from one process to another process in Node)

@@ -16,7 +16,7 @@
     "extendedDiagnostics": true,
     "outDir": "dist",
     "lib": [
-      "WebWorker",
+//      "WebWorker",
       "DOM"
     ]
   },

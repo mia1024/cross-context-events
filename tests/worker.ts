@@ -1,17 +1,17 @@
-import {useGlobalTransport, createDefaultTransport, createContainer} from "../src";
+import {useGlobalTransport, createDefaultTransport, createContainer} from "../src"
 
 const {createEvent} = createContainer("workerTest")
 
 useGlobalTransport(createDefaultTransport(
     {
         type: "worker",
-        target: self as DedicatedWorkerGlobalScope
+        target: self as Window
     }
 ))
 
-let online = createEvent<void>("worker.online")
-let data = createEvent<number>("worker.data")
-let echo = createEvent<number>("worker.echo")
+const online = createEvent<void>("worker.online")
+const data = createEvent<number>("worker.data")
+const echo = createEvent<number>("worker.echo")
 
 new online().emit()
 
