@@ -15,6 +15,10 @@
     "useDefineForClassFields": true,
     "extendedDiagnostics": true,
     "outDir": "dist",
+    "lib": [
+      "WebWorker",
+      "DOM"
+    ]
   },
   "include": [
     "src/*"

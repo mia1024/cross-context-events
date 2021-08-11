@@ -166,17 +166,27 @@ function createContainer(containerName: string | null): EventContainer {
             } while (stems.length > 0)
         }
 
-        static addTransport(transport: Transport) {
+        static useTransport(transport: Transport) {
             if (containerName === null) throw Error("Anonymous container cannot add cross context target")
             transport.bindEvent(this as unknown as EventType<any>)
             if (this.transports.has(transport)) throw Error(`Transport already exists for event '${this.type}' (container '${containerName}')`)
             this.transports.add(transport)
         }
 
-        relay(){
-            containerTransports.forEach(t => t.send(this, true))
-            globalTransports.forEach(t => t.send(this, true))
-            this.typeClass.transports.forEach(t => t.send(this, true))
+        relay(from?: Transport) {
+            containerTransports.forEach(t => {
+                if (t===from) return
+                t.send(this, true)
+            })
+            globalTransports.forEach(t => {
+                    if (t===from) return
+                    t.send(this, true)
+                }
+            )
+            this.typeClass.transports.forEach(t => {
+                if (t===from) return
+                t.send(this, true)
+            })
         }
 
         emit(options: EmitOptions = {relay: true, bubble: true}) {
@@ -267,14 +277,14 @@ function createContainer(containerName: string | null): EventContainer {
         return BaseEvent.getRegisteredType(type) as EventType<Data>
     }
 
-    function addTransport(transport: Transport) {
+    function useTransport(transport: Transport) {
         if (containerName === null) throw Error("Anonymous containers can't bind to transports")
         if (containerTransports.has(transport)) throw Error("Transport already exists")
         containerTransports.add(transport)
         transport.bindContainer(container)
     }
 
-    const container = {createEvent, getEvent, addTransport, name: containerName} // bound to a const so it can be access within closure of events
+    const container = {createEvent, getEvent, useTransport, name: containerName} // bound to a const so it can be access within closure of events
     if (containerName) createdContainers.set(containerName, container)
     return container
 }
