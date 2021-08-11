@@ -9,7 +9,7 @@ The global scope of this package. If you are using ES modules, the package name
 to import things from is `"cross-context-events"`. See
 [where to import things](quickstart?id=where-to-import-things).
 
-### <code>CrossContextEvents.createContainer(name)</code>
+### <code>CrossContextEvents.createContainer(name)</code> :id=createContainer
 
 Create a container.
 
@@ -47,7 +47,7 @@ events created in the past and future in all named containers.
 - Returns: `undefined`
 - Typescript signature: `useGlobalTransport(transport: Transport) => void`
 
-### <code>CrossContextEvents.createDefaultTransport(transportOptions)</code>
+### <code>CrossContextEvents.createDefaultTransport(transportOptions)</code> :id=createDefaultTransport
 
 A convenient function providing implementations for some common transports. See
 [transports](transports) for more details.

@@ -1,4 +1,4 @@
-- [Home](/)
+- [Introduction](/)
 - [Quickstart](quickstart)
 - [Events](events)
 - [Containers](containers)
