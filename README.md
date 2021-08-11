@@ -47,7 +47,7 @@ npm install cross-context-events
 ## Getting started
 This example uses the [WebWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API),
 but it can be easily switched to Node processes, iFrames, or others by simply
-changing the transport used. For details, please refer to [transports]()
+changing the transport used. For details, please refer to [transports](https://mia1024.github.io/cross-context-events/#/transports)
 ```js
 // index.js
 
