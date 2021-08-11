@@ -2,16 +2,17 @@ import expect from "expect"
 import {fork} from "child_process"
 import path from "path"
 import {Transport, createContainer, TransportData, createDefaultTransport, createEvent} from "../src"
+import {readFileSync} from "fs"
 
 describe("transports.ts", () => {
 
     it("raises an error for anonymous container", () => {
         const container = createContainer(null)
-        expect(() => container.addTransport(new Transport({
+        expect(() => container.useTransport(new Transport({
             recving() {},
             sending() {}
         }))).toThrowError()
-        expect(() => container.createEvent("test").addTransport(new Transport({
+        expect(() => container.createEvent("test").useTransport(new Transport({
             recving() {},
             sending() {}
         }))).toThrowError()
@@ -25,13 +26,13 @@ describe("transports.ts", () => {
         const TransportEvent = container2.createEvent<TransportData>("event.transport")
         const RecvEvent = container3.createEvent<number>("event.x")
 
-        EmitEvent.addTransport(new Transport({
+        EmitEvent.useTransport(new Transport({
             recving() {},
             sending(data: TransportData) {
                 new TransportEvent(data).emit()
             }
         }, {containerName: RecvEvent.containerName!}))
-        RecvEvent.addTransport(new Transport({
+        RecvEvent.useTransport(new Transport({
             recving(listener: (data: TransportData) => void) {
                 TransportEvent.addListener(e => listener(e.data))
             },
@@ -47,7 +48,7 @@ describe("transports.ts", () => {
 
     })
 
-    it("it raises event in child process correctly", async () => {
+    it("it works in child process", async () => {
         const container = createContainer("testChildProcess")
 
         const ECreate = container.createEvent("child.created")
@@ -57,7 +58,7 @@ describe("transports.ts", () => {
             target: child
         })
 
-        container.addTransport(transport)
+        container.useTransport(transport)
         await ECreate.waitForOne()
 
         const EInit = container.createEvent<number>("child.data.init")
@@ -67,6 +68,35 @@ describe("transports.ts", () => {
         new EInit(n).emit()
         const e = await EEcho.waitForOne()
         expect(e.data).toEqual(n)
+    })
+
+    it("works in worker", async () => {
+        let {createEvent, useTransport} = createContainer("workerTest")
+        let online = createEvent<void>("worker.online")
+        let data = createEvent<number>("worker.data")
+        let echo = createEvent<number>("worker.echo")
+        let worker = new Worker(
+            URL.createObjectURL(
+                new Blob([
+                        readFileSync(path.resolve(__dirname, "./worker.js"), {encoding: "utf-8"})
+                    ]
+                )
+            )
+        )
+
+        useTransport(createDefaultTransport({
+            type: "worker",
+            target: worker
+        }))
+
+        await online.waitForOne()
+
+        let n = Math.random()
+
+        let e = echo.waitForOne() // this isn't actually multithreaded so the listener has to be added before
+        new data(n).emit()
+
+        expect((await e).data).toEqual(n)
     })
 
 })

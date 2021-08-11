@@ -43,13 +43,13 @@ class Transport {
         if (target.containerName) this.targetContainerName = target.containerName
     }
 
-    private static emitEvent(Event: EventType<any>, data: TransportData) {
+    private emitEvent(Event: EventType<any>, data: TransportData) {
         const e = new Event(data.d, data.i)
+        eventsSeen.add(data.i)
         if (data.r) {
-            e.relay()
+            e.relay(this)
         }
 
-        eventsSeen.add(data.i)
         e.emit({
             relay: false
         })
@@ -69,7 +69,7 @@ class Transport {
 
         this.recvingFunc((data) => {
             if (data.e !== "x" || data.c !== container || data.t !== type || eventsSeen.has(data.i)) return
-            Transport.emitEvent(Event, data)
+            this.emitEvent(Event, data)
         })
     }
 
@@ -88,7 +88,7 @@ class Transport {
                 console.warn("Event payload", data)
                 return
             }
-            Transport.emitEvent(Event, data)
+            this.emitEvent(Event, data)
         })
     }
 
@@ -102,14 +102,12 @@ class Transport {
                 console.warn("Event payload", data)
                 return
             }
-            Transport.emitEvent(Event, data)
+            this.emitEvent(Event, data)
         })
     }
 
     // send the events to all listeners of the transport, excluding self
     send(e: Event<any>, relay: boolean): void {
-        // if (eventsSeen.has(e.id)) return
-        // eventsSeen.add(e.id)
         this.sendingFunc(
             {
                 c: this.targetContainerName || (e.constructor as EventType<any>).containerName!,
@@ -135,7 +133,7 @@ type IFrameTransportOptions = {
 
 type WorkerTransportOptions = {
     type: "worker"
-    target: Worker
+    target: Worker | DedicatedWorkerGlobalScope
 }
 
 type RuntimeTransportOptions = {
@@ -184,7 +182,7 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
         case "worker":
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    (target as Worker).addEventListener("message", e => callback(e.data))
+                    (target as Worker).addEventListener("message", (e:MessageEvent) => callback(e.data))
                 }, sending(data: TransportData) {
                     (target as Worker).postMessage(data)
                 }
