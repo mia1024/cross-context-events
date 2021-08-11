@@ -71,11 +71,11 @@ describe("transports.ts", () => {
     })
 
     it("works in worker", async () => {
-        let {createEvent, useTransport} = createContainer("workerTest")
-        let online = createEvent<void>("worker.online")
-        let data = createEvent<number>("worker.data")
-        let echo = createEvent<number>("worker.echo")
-        let worker = new Worker(
+        const {createEvent, useTransport} = createContainer("workerTest")
+        const online = createEvent<void>("worker.online")
+        const data = createEvent<number>("worker.data")
+        const echo = createEvent<number>("worker.echo")
+        const worker = new Worker(
             URL.createObjectURL(
                 new Blob([
                         readFileSync(path.resolve(__dirname, "./worker.js"), {encoding: "utf-8"})
@@ -91,9 +91,9 @@ describe("transports.ts", () => {
 
         await online.waitForOne()
 
-        let n = Math.random()
+        const n = Math.random()
 
-        let e = echo.waitForOne() // this isn't actually multithreaded so the listener has to be added before
+        const e = echo.waitForOne() // this isn't actually multithreaded so the listener has to be added before
         new data(n).emit()
 
         expect((await e).data).toEqual(n)

@@ -35,6 +35,7 @@
     "@types/mocha": "8",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "@typescript-eslint/parser": "^4.28.4",
+    "electron": "^13.1.9",
     "eslint": "^7.31.0",
     "expect": "^27.0.6",
     "global-jsdom": "^8.1.0",

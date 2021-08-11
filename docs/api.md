@@ -72,6 +72,9 @@ type IFrameTransportOptions = {
 type WorkerTransportOptions = {
     type: "worker"
     target: Worker | DedicatedWorkerGlobalScope
+    // due to an open issue in Typescript https://github.com/microsoft/TypeScript/issues/20595
+    // the actual implementation on this is Worker | Window, even though 
+    // DedicatedWorkerGlobalScope is the technically correct target
 }
 
 type RuntimeTransportOptions = {
@@ -89,12 +92,26 @@ type ParentProcessTransportOptions = {
     target: NodeJS.Process
 }
 
+type ElectronMainTransportOptions = {
+    type: "ipcMain"
+    target: Electron.BrowserWindow
+}
+
+
+type ElectronRendererTransportOptions = {
+    type: "ipcRenderer"
+    target: Electron.IpcMain
+}
+
 type DefaultTransportOptions = WindowTransportOptions
     | IFrameTransportOptions
     | WorkerTransportOptions
     | RuntimeTransportOptions
     | ChildProcessTransportOptions
     | ParentProcessTransportOptions
+    | ElectronMainTransportOptions
+    | ElectronRendererTransportOptions
+
 
 function createDefaultTransport(transportOptions: DefaultTransportOptions): Transport
 ```

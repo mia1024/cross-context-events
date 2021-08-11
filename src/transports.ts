@@ -1,4 +1,5 @@
 /// <reference types="chrome" />
+/// <reference types="electron" />
 import type {ChildProcess} from "child_process"
 import type {Event, EventContainer, EventType} from "./event_types"
 
@@ -56,7 +57,7 @@ class Transport {
         })
     }
 
-    static ignore(id:string){
+    static ignore(id: string) {
         eventsSeen.add(id)
     }
 
@@ -134,7 +135,7 @@ type IFrameTransportOptions = {
 
 type WorkerTransportOptions = {
     type: "worker"
-    target: Worker | DedicatedWorkerGlobalScope
+    target: Worker | Window
 }
 
 type RuntimeTransportOptions = {
@@ -152,6 +153,16 @@ type ParentProcessTransportOptions = {
     target: NodeJS.Process
 }
 
+type ElectronMainTransportOptions = {
+    type: "ipcMain"
+    target: Electron.BrowserWindow
+}
+
+
+type ElectronRendererTransportOptions = {
+    type: "ipcRenderer"
+    target: Electron.IpcMain
+}
 
 type DefaultTransportOptions =
     WindowTransportOptions
@@ -160,6 +171,8 @@ type DefaultTransportOptions =
     | RuntimeTransportOptions
     | ChildProcessTransportOptions
     | ParentProcessTransportOptions
+    | ElectronMainTransportOptions
+    | ElectronRendererTransportOptions
 
 function createDefaultTransport(transportOptions: DefaultTransportOptions): Transport {
     const {type, target} = transportOptions
@@ -183,7 +196,7 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
         case "worker":
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    (target as Worker).addEventListener("message", (e:MessageEvent) => callback(e.data))
+                    (target as Worker).addEventListener("message", (e: MessageEvent) => callback(e.data))
                 }, sending(data: TransportData) {
                     (target as Worker).postMessage(data)
                 }
@@ -226,8 +239,32 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
                         p.send(data)
                 }
             })
+        case "ipcMain": { // for scoping
+            const {ipcMain} = require("electron")
+            return new Transport({
+                recving(callback: (data: TransportData) => void) {
+                    ipcMain.on("cross-context-events", (event, args) => callback(args))
+                }, sending(data: TransportData) {
+                    (target as Electron.BrowserWindow).webContents.send("cross-context-events", data)
+                }
+            })
+        }
+        case "ipcRenderer": {
+            const {ipcRenderer} = require("electron") // runtime require so it doesn't pollute other packages
+            return new Transport({
+                recving(callback: (data: TransportData) => void) {
+                    ipcRenderer.on("cross-context-events", (event, args) => callback(args))
+                }, sending(data: TransportData) {
+                    ipcRenderer.send("cross-context-events", data)
+                }
+            })
+
+        }
+
         default:
-            throw Error("Unsupported default transport type " + target)
+            throw Error(`Unsupported default transport type ${target}, please refer to ` +
+                "https://mia1024.github.io/cross-context-events/#/api?id=createDefaultTransport " +
+                "for supported types")
     }
 }
 
