@@ -7,7 +7,15 @@
   <meta name="description" content="Description">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <script async src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <style>
+    h3 code { /* for API reference section*/
+      color: inherit !important;
+      background: none !important;
+      font-size: 1.2rem !important;
+    }
+  </style>
 </head>
 <body>
   <div id="app"></div>
@@ -16,8 +24,10 @@
       name: 'Cross Context Events',
       repo: 'mia1024/cross-context-events',
       loadSidebar: true,
-      auto2top: true
+      auto2top: true,
+      subMaxLevel: 3
     }
   </script>
+  <script async src="https://cdn.jsdelivr.net/npm/prismjs@1.24.1/components/prism-typescript.min.js"></script>
 </body>
 </html>

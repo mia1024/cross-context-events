@@ -1,12 +1,15 @@
-# Typescript considerations
+# Typescript support
 
-Cross context events fully supports typescript. In fact, this library is written in Typescript. For the best type
-inferences, a few annotation is needed
+Cross context events fully supports typescript. In fact, this library is written
+in Typescript. For the best results with inferences, a few annotation is needed.
+For any type that is not documented here, you can find them at [event_types.
+ts](https://github.com/mia1024/cross-context-events/blob/main/src/event_types.ts)
 
 ## Annotation in createEvent()
 
-The first (and likely the only) type annotation you need is for `createEvent()`, and a lot of other things can be
-inferred. For simple events (one without data), the annotation for the data type should be `void`
+The first (and likely the only) type annotation you need is for `createEvent()`,
+and a lot of other things can be inferred. For simple events (one without data),
+the annotation for the data type should be `void`
 
 ```typescript
 import {createEvent} from "cross-context-events"
@@ -22,10 +25,10 @@ new NumberEvent() // TS2554: expected 1 arguments, got 0
 new NumberEvent("5") // TS2345: string is not assignable to number
 ```
 
-## Annotation in getEvent()
+## Annotation for getEvent()
 
-Similarly, if you use `getEvent()` to retrieve the event, you must provide a type annotation or typescript might get mad
-at you.
+Similarly, if you use `getEvent()` to retrieve the event, you must provide a
+type annotation or typescript might get mad at you.
 
 ```typescript
 import {getEvent, createEvent} from "cross-context-events"
@@ -42,8 +45,9 @@ event.emit()
 
 ## Types for events and listeners
 
-If you have enabled `noImplicitAny` option for Typescript, you will need to provide the type for the argument to your
-listener function. The return type of `createEvent` is `EventType`, and the instance is
+If you have enabled `noImplicitAny` option for Typescript, you will need to
+provide the type for the argument to your listener function. The return type
+of `createEvent` is `EventType`, and the instance is
 `Event`.
 
 ```typescript
@@ -63,3 +67,23 @@ let event = new DataEvent("Some data")
 
 event.emit()
 ```
+
+## Types for transport
+
+Typescript might not be able to infer the types for functions
+inside `Transport`'s constructor. If you find yourself writing your own
+transport and wonder what the types are for the constructor, here you go:
+
+```typescript
+import type {TransportData} from "cross-context-events";
+
+new Transport({
+    recving(callback: (data: TransportData) => void) {
+        // do something with callback
+    },
+    sending(data: TransportData) {
+        // do something with data
+    }
+})
+```
+

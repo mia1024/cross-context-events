@@ -19,6 +19,8 @@ an example namespace for 'test.user.create'
 }
  */
 
+let checkContainerName = false
+
 const createdContainers = new Map<string, EventContainer>()
 const globalTransports = new Set<Transport>()
 
@@ -37,7 +39,7 @@ function createContainer(containerName: string | null): EventContainer {
 
     const containerTransports = new Set<Transport>()
 
-    if (containerName !== null) {
+    if (containerName !== null && checkContainerName) {
         if (createdContainers.has(containerName)) {
             throw Error(`A container with name '${containerName}' already exists`)
         }
@@ -175,16 +177,16 @@ function createContainer(containerName: string | null): EventContainer {
 
         relay(from?: Transport) {
             containerTransports.forEach(t => {
-                if (t===from) return
+                if (t === from) return
                 t.send(this, true)
             })
             globalTransports.forEach(t => {
-                    if (t===from) return
+                    if (t === from) return
                     t.send(this, true)
                 }
             )
             this.typeClass.transports.forEach(t => {
-                if (t===from) return
+                if (t === from) return
                 t.send(this, true)
             })
         }
@@ -235,7 +237,6 @@ function createContainer(containerName: string | null): EventContainer {
         class E extends BaseEvent<Data> {
             declare static type: string // assigned using Object.defineProperty below()
             declare static container: EventContainer
-            declare static wait: () => Promise<Event<Data>>
         }
 
         Object.defineProperty(E, "type", {value: type, writable: false, configurable: false})
@@ -289,7 +290,8 @@ function createContainer(containerName: string | null): EventContainer {
     return container
 }
 
-const {createEvent, getEvent} = createContainer("global")
+const {createEvent, getEvent} = createContainer("__global__")
+checkContainerName = true
 
 function createSimpleEvent(type: string, errorIfExists: boolean = true): EventType<void> {
     return createEvent<void>(type, errorIfExists)

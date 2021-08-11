@@ -1,44 +1,51 @@
 import {Transport} from "./transports"
 
 type EventListener<Data> = (event: Event<Data>) => void
-export type EmitOptions={
+export type EmitOptions = {
     relay?: boolean,
     bubble?: boolean
 }
 
 interface Event<Data> {
     data: Data
-    id:string
+    id: string
     listeners: Set<EventListener<Data>>
     type: string
-    relay: (from?:Transport)=>void
+    relay: (from?: Transport) => void
     typeClass: EventType<Data>
     emit: (options?: EmitOptions) => void
 }
 
 interface EventType<Data> {
-    new(data: Data, id?:string): Event<Data>
+    new(data: Data, id?: string): Event<Data>
 
     container: EventContainer
     containerName: string | null
 
     listeners: Set<EventListener<Data>>
+
     addListener(listener: EventListener<Data>): EventType<Data>
+
     removeListener(listener: EventListener<Data>): EventType<Data>
+
     once(listener: EventListener<Data>): EventType<Data>
-    waitForOne: ()=>Promise<Event<Data>>
+
+    waitForOne: () => Promise<Event<Data>>
 
     transports: Set<Transport>
-    useTransport:(transport:Transport)=>void
+    useTransport: (transport: Transport) => void
 
     type: string
 }
 
 interface EventContainer {
     createEvent<Data>(type: string, errorIfExists?: boolean): EventType<Data>
-    useTransport(transport:Transport):void
+
+    useTransport(transport: Transport): void
+
     getEvent<Data = any>(type: string): EventType<Data> | undefined
-    name:string|null
+
+    name: string | null
 }
 
 
