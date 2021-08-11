@@ -43,6 +43,7 @@ class Transport {
         if (target.containerName) this.targetContainerName = target.containerName
     }
 
+    // a central function for all incoming events to be relayed + emitted
     private emitEvent(Event: EventType<any>, data: TransportData) {
         const e = new Event(data.d, data.i)
         eventsSeen.add(data.i)

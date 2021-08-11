@@ -1,28 +1,26 @@
-# Getting started
+# Events
 
-This section only explains how to use the package with plain Javascript. If you are using Typescript, please also refer
-to [typescript](typescript) for a few additional considerations.
+Events are the core of this library. In fact, as the name suggests, handling events
+is the only thing this library does. The sections below assume you are using
+an ES module that's installed through npm.
 
-## Where to import things
+## Creating events
 
-If you are using an ES-module, after [installing](../) the package, you can simply import the functions such as
+Events can be created with the `createEvent()` method
 
 ```js
 import {createEvent} from "cross-context-events"
+const Event = createEvent("something.happened")
 ```
 
-If you are getting the library through a script tag, then after the script is loaded, you can find everything
-in `CrossContextEvents` global variable. Such as
+Event names must start with a letter. If you try to create two events with the
+same name, the same event object will be returned. That is 
 
-```html
-
-<script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
-<script type="text/javascript">
-    const {createEvent} = CrossContextEvents
-</script>
+```js
+createEvent("something.happened") === createEvent("something.happened")
 ```
 
-The sections below assume you are using an ES module that's installed through npm.
+will be true.
 
 ## Emitting simple events (without data)
 
@@ -98,14 +96,14 @@ event.emit({
 
 ## Lookup event by names
 
-As stated in [introduction](../), the intention of the library is for you to pass event objects around instead of by a
+As stated in [introduction](/), the intention of the library is for you to pass event objects around instead of by a
 string name. However, if you really need to use strings for whatever reason, you can use the `getEvent()` method
 
 ```js
 import {createEvent, getEvent} from "cross-context-events"
 
 const Event = createEvent("event")
-console.log(Object.is(getEvent("event"), Event)) // true
+console.log(getEvent("event") === Event) // true
 ```
 
 Note that this is subject to the constraint of containers. See [Containers and transports](containers-and-transports)
@@ -123,11 +121,5 @@ console.log(Event.type) // "event.type.name"
 
 let e = new Event()
 console.log(e.type) // "event.type.name"
-console.log(Object.is(Event, e.typeClass)) // true
+console.log(Event === e.typeClass) // true
 ```
-
-## What's next
-
-- [Containers and transports](containers-and-transports)
-- [Typescript considerations](typescript)
-- [API Reference](api)

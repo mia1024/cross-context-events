@@ -1,5 +1,6 @@
 - [Home](/)
-- [Getting Started](getting-started)
+- [Quickstart](quickstart)
+- [Events](events)
 - [Containers](containers)
 - [Transports](transports)
 - [Typescript](typescript)

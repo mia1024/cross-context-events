@@ -7,12 +7,14 @@
 ![](https://badgen.net/npm/types/cross-context-events)
 ![](https://badgen.net/npm/license/cross-context-events)
 
-Cross context events is a robust, lightweight package providing the option to send and receive events across JS
-execution context.
+Cross context events is a robust, lightweight package providing the option to
+send and receive events across JS execution context.
 
-You asked, what does this mean, exactly? Well, it means that when you emit an event in your script, the same event will
-also be emitted in all other linked execution contexts (i.e. other tabs, windows, processes), even on different
-computers if you want to! All you need to do is writing a few lines of code to link them together.
+You asked, what does this mean, exactly? Well, it means that when you emit an
+event in your script, the same event will also be emitted in all other linked
+execution contexts (i.e. other tabs, windows, processes), even on different
+computers if you want to! All you need to do is writing a few lines of code to
+link them together.
 
 ![demo](docs/demos/frames-and-windows/demo.gif)
 
@@ -45,9 +47,13 @@ npm install cross-context-events
 ```
 
 ## Getting started
-This example uses the [WebWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API),
-but it can be easily switched to Node processes, iFrames, or others by simply
-changing the transport used. For details, please refer to [transports](https://mia1024.github.io/cross-context-events/#/transports)
+
+This example uses
+the [WebWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+, but it can be easily switched to Node processes, iFrames, or others by simply
+changing the transport used. For details, please refer
+to [transports](https://mia1024.github.io/cross-context-events/#/transports)
+
 ```js
 // index.js
 
@@ -90,22 +96,26 @@ new OnlineEvent().emit()
 
 - Lightweight
 - No runtime dependency
+- Comprehensive [documentations](https://mia1024.github.
+  io/cross-context-events/)
 - Containerization
-    - Support for named and anonymous containers to provide isolation if you need
+    - Support for named and anonymous containers to provide isolation if you
+      need
 - Unified interface
     - Works the same way whether you are using browser, service worker, or node
 - Cross Context
-    - Capable of sending events across execution context (e.g. from one tab to another tab in browser or from one
-      process to another process in Node)
-      with minimal setup, so long as an IPC channel can be established between the sending context and receiving
-      context.
-    - Relay support: events can be optionally relayed across the network if you have one.
+    - Capable of sending events across execution context (e.g. from one tab to
+      another tab in browser or from one process to another process in Node)
+      with minimal setup, so long as an IPC channel can be established between
+      the sending context and receiving context.
+    - Relay support: events can be optionally relayed across the network if you
+      have one.
 - Typescript support
     - In fact, `cross-context-events` is written in typescript completely.
 - Comprehensive testing
     - All core functions are unittested
 - Namespaced events and bubbling
     - If you emit an event for `event.context.new`, then listeners for
-      `event.context` and `event` are also notified (but `event.context2` is not). This behavior can be disabled if
-      desired.
+      `event.context` and `event` are also notified (but `event.context2` is
+      not). This behavior can be disabled if desired.
       
