@@ -1,5 +1,4 @@
 /// <reference types="chrome" />
-/// <reference types="electron" />
 import type {ChildProcess} from "child_process"
 import type {Event, EventContainer, EventType} from "./event_types"
 
@@ -153,15 +152,21 @@ type ParentProcessTransportOptions = {
     target: NodeJS.Process
 }
 
+type ElectronWindowStub = { // typed here to avoid requiring electron for users
+    webContents: { send: (channel: string, ...args: any[]) => void }
+}
+
 type ElectronMainTransportOptions = {
     type: "ipcMain"
-    target: Electron.BrowserWindow
+    // target: Electron.BrowserWindow
+    target: ElectronWindowStub
 }
 
 
 type ElectronRendererTransportOptions = {
     type: "ipcRenderer"
-    target: Electron.IpcMain
+    // target: Electron.IpcMain
+    target: { send: (channel: string, ...args: any[]) => void }
 }
 
 type DefaultTransportOptions =
@@ -243,9 +248,9 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
             const {ipcMain} = require("electron")
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    ipcMain.on("cross-context-events", (event, args) => callback(args))
+                    ipcMain.on("cross-context-events", (event: any, args: TransportData) => callback(args))
                 }, sending(data: TransportData) {
-                    (target as Electron.BrowserWindow).webContents.send("cross-context-events", data)
+                    (target as ElectronWindowStub).webContents.send("cross-context-events", data)
                 }
             })
         }
@@ -253,7 +258,7 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
             const {ipcRenderer} = require("electron") // runtime require so it doesn't pollute other packages
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    ipcRenderer.on("cross-context-events", (event, args) => callback(args))
+                    ipcRenderer.on("cross-context-events", (event: any, args: TransportData) => callback(args))
                 }, sending(data: TransportData) {
                     ipcRenderer.send("cross-context-events", data)
                 }

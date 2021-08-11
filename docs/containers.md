@@ -31,7 +31,8 @@ const EventB = containerB.createEvent("event")
 console.log(EventA === EventB) // false
 ```
 
-In addition, their listeners will be independent.
+In addition, their listeners will be independent (unless, of course, that 
+you made a [transport](transports?id=custom-transport) to bridge them together)
 
 ```js
 EventA.addListener(() => console.log("event in containerA"))

@@ -50,11 +50,11 @@ events created in the past and future in all named containers.
 ### <code>CrossContextEvents.createDefaultTransport(transportOptions)</code> :id=createDefaultTransport
 
 A convenient function providing implementations for some common transports. See
-[transports](transports) for more details.
+[transports](transports) for rationale.
 
 - `transportOptions`: A `DefaultTransportOptions` object. See below for its
   definition.
-- Returns: a [Transport](api?id=transport) object.
+- Returns: a [Transport](api?id=transport) object. 
 
 #### Typescript signature
 

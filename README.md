@@ -96,8 +96,7 @@ new OnlineEvent().emit()
 
 - Lightweight
 - No runtime dependency
-- Comprehensive [documentations](https://mia1024.github.
-  io/cross-context-events/)
+- Comprehensive [documentations](https://mia1024.github.io/cross-context-events/)
 - Containerization
     - Support for named and anonymous containers to provide isolation if you
       need
