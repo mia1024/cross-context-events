@@ -1,7 +1,7 @@
 import expect from "expect"
 import {fork} from "child_process"
 import path from "path"
-import {Transport, createContainer, TransportData, createDefaultTransport, createEvent} from "../src"
+import {Transport, createContainer, TransportData, createDefaultTransport} from "../src"
 import {readFileSync} from "fs"
 
 describe("transports.ts", () => {
