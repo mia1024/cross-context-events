@@ -56,11 +56,11 @@ class Transport {
         })
     }
 
-    static clearAllEventReferences() {
+    static clearAllEventReferences(): void {
         eventsSeen.clear()
     }
 
-    static ignore(id: string) {
+    static ignore(id: string): void {
         eventsSeen.add(id)
     }
 
@@ -167,7 +167,7 @@ type ElectronIpcMainStub = { // typed here to avoid requiring electron for users
 
 type ElectronIpcRendererStub = { // typed here to avoid requiring electron for users
     send: (channel: string, ...args: any[]) => void
-        on: (channel: string, ...args: any[]) => void
+    on: (channel: string, ...args: any[]) => void
 }
 
 
