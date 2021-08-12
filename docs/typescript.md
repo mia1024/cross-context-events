@@ -2,8 +2,8 @@
 
 Cross context events fully supports typescript. In fact, this library is written
 in Typescript. For the best results with inferences, a few annotation is needed.
-For any type that is not documented here, you can find them at [event_types.
-ts](https://github.com/mia1024/cross-context-events/blob/main/src/event_types.ts)
+For any type that is not documented here, you can find it in
+the [API reference](api).
 
 ## Annotation in createEvent()
 

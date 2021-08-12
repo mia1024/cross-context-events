@@ -30,7 +30,7 @@ This example uses
 the [WebWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
 , but it can be easily switched to Node processes, iFrames, or others by simply
 changing the transport used. For details, please refer
-to [transports](transports)
+to [transports](transports).
 
 ```js
 // index.js
@@ -69,6 +69,8 @@ useGlobalTransport(createDefaultTransport({
 const OnlineEvent = createEvent("worker.online")
 new OnlineEvent().emit()
 ```
+
+As you can see, `Worker is now online ＼(＾▽＾)／` has been logged to the console from the main thread. Yay!
 
 ## What's next
 

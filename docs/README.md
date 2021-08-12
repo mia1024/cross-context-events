@@ -81,7 +81,7 @@ yarn && yarn pack
     - Even if you have a network of nested iframes like the image below, and you
       emit an event in iframe 9, it will be emitted in all frames and the parent
       window. This also applies to a chain or child processes or workers or any
-      other combinations of communication channels.
+      other combinations of communication channels. See [event relaying](transports?id=event-relaying).
       
       ![](imgs/frametree.svg)
 
