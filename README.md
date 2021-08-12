@@ -59,7 +59,7 @@ See [here](https://mia1024.github.io/cross-context-events/).
       window. This also applies to a chain or child processes or workers or any
       other combinations of communication channels.
 
-      ![](imgs/frametree.svg)
+      ![](docs/imgs/frametree.svg)
 
 ## Installation
 
