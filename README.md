@@ -25,15 +25,55 @@ link them together.
 
 See [here](https://mia1024.github.io/cross-context-events/).
 
+
+## Features
+
+- Lightweight
+- No runtime dependency
+- Comprehensive [documentations](https://mia1024.github.io/cross-context-events/)
+- Containerization
+    - Support for named and anonymous containers to provide isolation if you
+      need
+- Unified interface
+    - Works the same way whether you are using browser, service worker, node, or
+      even electron.
+- Cross Context
+    - Capable of sending events across execution context (e.g. from one tab to
+      another tab in browser or from one process to another process in Node)
+      with minimal setup, so long as an IPC channel can be established between
+      the sending context and receiving context.
+    - Relay support: events can be optionally relayed across the network if you
+      have one.
+- Typescript support
+    - Written completely in typescript completely with strong type inferences.
+- Comprehensive testing
+    - All core functions are unittested
+- Namespaced events and bubbling
+    - If you emit an event for `event.context.new`, then listeners for
+      `event.context` and `event` are also notified (but `event.context2` is
+      not). This behavior can be disabled if desired.
+      See [event bubbling](events?id=event-bubbling).
+- Event relaying
+    - Even if you have a network of nested iframes like the image below, and you
+      emit an event in iframe 9, it will be emitted in all frames and the parent
+      window. This also applies to a chain or child processes or workers or any
+      other combinations of communication channels.
+
+      ![](imgs/frametree.svg)
+
 ## Installation
 
-CDN
+Unpkg
 
 ```html
-
 <script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
 ```
 
+jsDelivr
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/cross-context-events/dist/cross-context-events.min.js"></script>
+```
 yarn
 
 ```bash
@@ -91,31 +131,3 @@ useGlobalTransport(createDefaultTransport({
 const OnlineEvent = createEvent("worker.online")
 new OnlineEvent().emit()
 ```
-
-## Features
-
-- Lightweight
-- No runtime dependency
-- Comprehensive [documentations](https://mia1024.github.io/cross-context-events/)
-- Containerization
-    - Support for named and anonymous containers to provide isolation if you
-      need
-- Unified interface
-    - Works the same way whether you are using browser, service worker, node,
-      or electron
-- Cross Context
-    - Capable of sending events across execution context (e.g. from one tab to
-      another tab in browser or from one process to another process in Node)
-      with minimal setup, so long as an IPC channel can be established between
-      the sending context and receiving context.
-    - Relay support: events can be optionally relayed across the network if you
-      have one.
-- Typescript support
-    - In fact, `cross-context-events` is written in typescript completely.
-- Comprehensive testing
-    - All core functions are unittested
-- Namespaced events and bubbling
-    - If you emit an event for `event.context.new`, then listeners for
-      `event.context` and `event` are also notified (but `event.context2` is
-      not). This behavior can be disabled if desired.
-      

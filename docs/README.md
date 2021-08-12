@@ -17,14 +17,12 @@ emitting events across multiple execution contexts.
 Unpkg
 
 ```html
-
 <script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
 ```
 
 jsDelivr
 
 ```html
-
 <script src="https://cdn.jsdelivr.net/npm/cross-context-events/dist/cross-context-events.min.js"></script>
 ```
 
