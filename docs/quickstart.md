@@ -70,36 +70,6 @@ const OnlineEvent = createEvent("worker.online")
 new OnlineEvent().emit()
 ```
 
-## Potential issue with Webpack
-
-You might run into issue with Webpack due to the experimental support for
-Electron as a transport. If you are not using electron, you should be able to
-fix it by adding
-
-```js
-module.exports = {
-    externals: {
-        "electron": "commonjs2 electron"
-    }
-}
-```
-
-to your Webpack configuration. If this is an unacceptable solution, please open
-an issue on GitHub. If you do not have the time to open the issue, you can
-edit either `cross-context-events/dist/transports.js` (if you installed it as a
-dependency) or `cross-context-events/src/transports.ts` (if you installed it as
-a devDependency) in your `node_modules` and remove the branches starting with
-
-```
-case "ipcMain":
-```
-and 
-```
- case "ipcRenderer":
-```
-
-in `createDefaultTransports()`.
-
 ## What's next
 
 - [Containers](containers)

@@ -54,7 +54,7 @@ A convenient function providing implementations for some common transports. See
 
 - `transportOptions`: A `DefaultTransportOptions` object. See below for its
   definition.
-- Returns: a [Transport](api?id=transport) object. 
+- Returns: a [Transport](api?id=transport) object.
 
 #### Typescript signature
 
@@ -94,13 +94,15 @@ type ParentProcessTransportOptions = {
 
 type ElectronMainTransportOptions = {
     type: "ipcMain"
-    target: Electron.BrowserWindow
+    target: {
+        win: Electron.BrowserWindow,
+        ipcMain: Electron.IpcMain
+    }
 }
-
 
 type ElectronRendererTransportOptions = {
     type: "ipcRenderer"
-    target: Electron.IpcMain
+    target: Electron.IpcRenderer
 }
 
 type DefaultTransportOptions = WindowTransportOptions
@@ -473,6 +475,21 @@ emit an event for it.
 
 - `id`: string. The ID to ignore.
 - Typescript signature: `ignore(id: string) => void`
+
+### <code>Transport.clearAllEventReferences()</code> :id=transport-clearAllEventReferences
+
+This is a static method. By default, all transports collectively keep track of
+all the events that have been emitted through any transport. This helps avoid
+circular event firing when transports form a network. However, as the number of
+events that have been emitted grow, this set becomes larger and it may cause
+some memory or performance issues. If this is the case, you should call this
+method periodically to clear those references.
+
+!> if you call this method while some events are in the process of being
+transported, those events might be emitted twice.
+
+- Returns: `undefined`
+- Typescript signature: `clearAllEventReferences() => void`
 
 ### TransportInit
 
