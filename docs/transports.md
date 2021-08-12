@@ -17,10 +17,11 @@ can do this:
 
 1. using [useGlobalTransport()](api?id=useGlobalTransport) to register it
    globally, which applies to all events in the current execution context.
-2. using [Container.useTransport](api?id=container-useTransport) to register it
-   within the container, which applies to all events in the calling container.
-3. using [EventType.useTransport](api?id=eventType-useTransport) to register it
-   on a single event only, which only applies to that particular event.
+2. using [Container.useTransport()](api?id=container-useTransport) to register
+   it within the container, which applies to all events in the calling
+   container.
+3. using [EventType.useTransport()](api?id=eventType-useTransport) to register
+   it on a single event only, which only applies to that particular event.
 
 Note that if you register the same transport using more than one mechanism
 above, your events will be emitted more than once, so make sure to not do it. It
@@ -240,9 +241,27 @@ communication network as the image below
 
 One scenario this can happen is if `A` is the parent process and `B` and `C` are
 child processes, where each child has direct communication with its parent, but
-not among each other. In this case, it might be quite a hassle to 
+not among each other. In this case, if you emit an event in `B`, it is
+transmitted to `A` through the transport, and `A` will relay the event to `C`.
+After relaying, `C` will receive the event as well.
+
+This mechanism works in the more complicated scenarios, such as the one
+demonstrated below
 
 ![](imgs/frametree.svg)
+
+Here, no matter which frame you emit an event in, all frames will receive the
+event, including the parent window. For example, if you emit an event in frame
+9, it will first be sent to frame 7 through the transport, which will be relayed
+to both frame 8 and the parent window, which then goes to 1, 4, and 6, and so
+on.
+
+Since it's very possible that the network forms a cycle, the library keeps track
+of a list of events already seen and ignores any incoming event marked as seen.
+While each event ID is small in size, a huge quantity of them may cause some
+memory or performance issues. If this becomes the case for you, consider calling
+[Transport.clearAllEventReferences()](api?id=Transport-clearAllEventReferences)
+periodically.
 
 ## Writing your own transport :id=custom-transport
 
@@ -251,7 +270,8 @@ to do is providing two functions `recving` and `sending` to bridge things
 together. For reference, here is the implementation for default transport for
 type `window`, which uses the
 [Window.postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)
-.
+. Note that since the data is available as `MessageEvent.data`, another function
+is needed to extract the data before passing it into the callback function.
 
 ```js
 import {Transport} from "cross-context-events";
@@ -270,7 +290,7 @@ And here is the implementation for type `childProcess`, which uses the
 from NodeJS.
 
 ```js
-Transport({
+new Transport({
     recving(callback) {
         target.on("message", callback)
     }, sending(data) {
@@ -279,4 +299,35 @@ Transport({
 })
 ```
 
-as you can see, they are pretty simple. 
+as you can see, they are pretty simple and each function is only one line.
+
+### The `sending()` function :id=sending
+
+The `sending` function is a function that sends out the data to the underlying
+IPC channel. It does not need to worry about what the data is (but for curious
+souls, it is documented [here](api?id=TransportData)) or perform any sanitation.
+The channel can be anything: a UNIX socket, a WebSocket, an AJAX call, or even
+instructs a printer to print it out and mail it to another data center (which
+would, obviously, be quite slow). So long as the data is sent and can be read by
+the `recving()` function in the other execution context, all is good.
+
+This function is called every time an event is emitted.
+
+### The `recving()` function :id=recving
+
+The `recving` function is slightly more complicated. It is what is used to
+receive an incoming event. It takes a single argument, which is the listener for
+the event (or, if you prefer, the callback function whenever a new event
+arrives). This listener is constructed by the library in runtime depending on
+how the transport is being [registered](transports?id=using-transports). The job
+of the `recving` function is to call this listener when the data is received and
+pass along the data to the listener as the first argument. It does not need to
+perform any data validation or sanitation, as any malformed data will be
+discarded by the listener. However, it does need to make sure the data passed in
+is exactly the same as what was sent out using the `sending` function on the
+other end.
+
+Unlike the `sending` function, this function is only called each time the
+transport is being [registered](transports?id=using-transports) to a
+new [EventType](api?id=eventType), a [Container](api?id=container), or globally.
+

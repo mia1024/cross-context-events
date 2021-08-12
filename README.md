@@ -25,12 +25,14 @@ link them together.
 
 See [here](https://mia1024.github.io/cross-context-events/).
 
-
 ## Features
 
 - Lightweight
 - No runtime dependency
-- Comprehensive [documentations](https://mia1024.github.io/cross-context-events/)
+-
+
+Comprehensive [documentations](https://mia1024.github.io/cross-context-events/)
+
 - Containerization
     - Support for named and anonymous containers to provide isolation if you
       need
@@ -55,9 +57,11 @@ See [here](https://mia1024.github.io/cross-context-events/).
       See [event bubbling](events?id=event-bubbling).
 - Event relaying
     - Even if you have a network of nested iframes like the image below, and you
-      emit an event in iframe 9, it will be emitted in all frames and the parent
-      window. This also applies to a chain or child processes or workers or any
-      other combinations of communication channels.
+      emit an event in iframe 9 (or any frame or the parent window for that
+      matter), it will be emitted in all frames and the parent window. This also
+      applies to a chain or child processes or workers or any other combinations
+      of communication channels.
+      See [event relaying](transports?id=event-relaying).
 
       ![](docs/imgs/frametree.svg)
 
@@ -66,14 +70,17 @@ See [here](https://mia1024.github.io/cross-context-events/).
 Unpkg
 
 ```html
+
 <script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
 ```
 
 jsDelivr
 
 ```html
+
 <script src="https://cdn.jsdelivr.net/npm/cross-context-events/dist/cross-context-events.min.js"></script>
 ```
+
 yarn
 
 ```bash
@@ -88,11 +95,11 @@ npm install cross-context-events
 
 ## Getting started
 
-This example uses
-the [WebWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+This example uses the
+[WebWorker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
 , but it can be easily switched to Node processes, iFrames, or others by simply
 changing the transport used. For details, please refer
-to [transports](https://mia1024.github.io/cross-context-events/#/transports)
+to [transports](https://mia1024.github.io/cross-context-events/#/transports).
 
 ```js
 // index.js
@@ -131,3 +138,10 @@ useGlobalTransport(createDefaultTransport({
 const OnlineEvent = createEvent("worker.online")
 new OnlineEvent().emit()
 ```
+
+As you can see, `Worker is now online ＼(＾▽＾)／` has been logged to the console
+from the main thread. Yay!
+
+Please refer to the
+[documentation](https://mia1024.github.io/cross-context-events/#/quickstart)
+for more information. 
