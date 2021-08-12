@@ -14,23 +14,30 @@ emitting events across multiple execution contexts.
 
 ## Installation
 
-CDN
+Unpkg
 
 ```html
 
 <script src="https://unpkg.com/cross-context-events/dist/cross-context-events.min.js"></script>
 ```
 
+jsDelivr
+
+```html
+
+<script src="https://cdn.jsdelivr.net/npm/cross-context-events/dist/cross-context-events.min.js"></script>
+```
+
 yarn
 
-```shell
+```bash
 yarn add cross-context-events
 ```
 
 npm
 
-```shell
-npm i cross-context-events
+```bash
+npm install cross-context-events
 ```
 
 Note: while this package has no runtime dependencies, it does have quite a few
@@ -40,10 +47,45 @@ bundler such as webpack.
 
 Compile from source
 
-```shell
+```bash
 git clone git@github.com:mia1024/cross-context-events
 yarn && yarn pack
 ```
+
+## Features
+
+- Lightweight
+- No runtime dependency
+- Comprehensive [documentations](/)
+- Containerization
+    - Support for named and anonymous containers to provide isolation if you
+      need
+- Unified interface
+    - Works the same way whether you are using browser, service worker, node, or
+      even electron.
+- Cross Context
+    - Capable of sending events across execution context (e.g. from one tab to
+      another tab in browser or from one process to another process in Node)
+      with minimal setup, so long as an IPC channel can be established between
+      the sending context and receiving context.
+    - Relay support: events can be optionally relayed across the network if you
+      have one.
+- Typescript support
+    - Written completely in typescript completely with strong type inferences.
+- Comprehensive testing
+    - All core functions are unittested
+- Namespaced events and bubbling
+    - If you emit an event for `event.context.new`, then listeners for
+      `event.context` and `event` are also notified (but `event.context2` is
+      not). This behavior can be disabled if desired.
+      See [event bubbling](events?id=event-bubbling).
+- Event relaying
+    - Even if you have a network of nested iframes like the image below, and you
+      emit an event in iframe 9, it will be emitted in all frames and the parent
+      window. This also applies to a chain or child processes or workers or any
+      other combinations of communication channels.
+      
+      ![](imgs/frametree.svg)
 
 ## Why
 
@@ -95,18 +137,12 @@ as web pages (uses `window.postMessage`) and as a browser extension (uses
   package was mostly written for). If you can somehow communicate between the
   contexts (e.g. if you can use `window.postMessage`) or even using a server as
   a proxy and use a WebSocket. So long as communication can be established, you
-  can just use a few lines of configuration to tell `cross-context-events`
-  how to use that channel and it will handle everything else.
+  can just use a few lines of configuration to tell the package how to use that
+  channel (see [Transports](transports)) and it will handle everything else.
     - If, you have a mini-network and do not have direct communication between
       some nodes of the network, you can configure `cross-context-events` to
-      relay the information between nodes. For example, if you have window
-      `A`, `B`, and `C` where `A <=> B <=> C` are the available communication
-      paths, you can enable the relay feature so that events emitted in `A` can
-      be received by both `B` and `C`. A more complex graph is also supported
-      and
-      `cross-context-event` will avoid emitting the same event twice in a single
-      context, even if there are cycles in your network of
-      windows/iframes/childProcesses/whatever.
+      relay the information between nodes.
+      See [event relaying](transports?id=event-relaying).
 - Even if you don't use the cross context execution feature, you can still enjoy
   all other benefits from this package, and it's very lightweight so you can
   just add it without any trouble. For one thing, you can run it in both Node

@@ -1,12 +1,39 @@
 # Transports
 
 Transports are the core of this library. They are what made this library
-powerful and enables emitting events cross context.
+powerful and enables emitting events cross context. Each transport forms a
+two-way communication channel between two contexts. However, since transports
+attach themselves as listeners to the underlying IPC, you must register the
+matching transports on all contexts before events can be properly emitted
+cross-context.
 
 (In case you are wondering, yes it is possible to connect two containers through
 transports and this is actually what some of the unittests are doing).
 
 ## Using transports
+
+To use a transport, all you need to do is register it. There are three ways you
+can do this:
+
+1. using [useGlobalTransport()](api?id=useGlobalTransport) to register it
+   globally, which applies to all events in the current execution context.
+2. using [Container.useTransport](api?id=container-useTransport) to register it
+   within the container, which applies to all events in the calling container.
+3. using [EventType.useTransport](api?id=eventType-useTransport) to register it
+   on a single event only, which only applies to that particular event.
+
+Note that if you register the same transport using more than one mechanism
+above, your events will be emitted more than once, so make sure to not do it. It
+is recommended to register transports globally if they should be apply to all
+events, as it has a much better performance than registering for each individual
+event.
+
+Currently, there is no mechanism for transport removal once registered.
+
+How do you get a transport? Well you can either use one of
+the [default transports](transports?id=default-transports),
+or [make one on your own](transports?id=custom-transport) using the transport
+constructor.
 
 ## Default Transports
 
@@ -85,6 +112,16 @@ createDefaultTransport({
 })
 ```
 
+### Content Security Policy
+
+If you are using some browser APIs, you need to deal with content security
+policy. In essence, since the underlying transport uses
+the `window.postMessage()`, it is subject to same-origin policy like everything
+else you do in the browser. If you need to access things from another origin,
+consider having the server send out `Access-Control-Allow-Origin` header. If you
+have control over the user's browser (or if you are just debugging), you can
+launch a chrome instance with `--disable-web-security` flag to bypass it.
+
 ### Worker
 
 Worker is similar to window as it uses a `postMessage` method (except, instead
@@ -144,19 +181,9 @@ createDefaultTransport({
 ```
 
 The reason for `target: process` is to communicate with the parent process, the
-child needs to call `process.send`
+child needs to call `process.send`.
 
-### Content Security Policy
-
-If you are using some browser APIs, you need to deal with content security
-policy. In essence, since the underlying transport uses
-the `window.postMessage()`, it is subject to same-origin policy like everything
-else you do in the browser. If you need to access things from another origin,
-consider having the server send out `Access-Control-Allow-Origin` header. If you
-have control over the user's browser (or if you are just debugging), you can
-launch a chrome instance with `--disable-web-security` flag to bypass it.
-
-### Experimental supports
+## Experimental supports for electron and browser extension
 
 There are also experimental supports with browser extensions and electron IPC.
 They work to the best of my knowledge. However, due to the complexity of setting
@@ -164,7 +191,58 @@ up unittests involving either electron or browser extension, they are not tested
 regularly. If you are running into issues with them, please consider opening an
 issue on GitHub.
 
+### Browser extension
+
+```js
+createDefaultTransport({
+    type: "runtime"
+})
+```
+
+The target here is optional. If specified, it should be the ID of the target
+extension. If omitted, this will be all pages within the current extension.
+
+### Electron
+
+On main process
+
+```js
+const {BrowserWindow, ipcMain} = require("electron")
+const win = new BrowserWindow({width: 800, height: 600})
+
+createDefaultTransport({
+    type: "ipcMain",
+    target: {
+        win: win,
+        ipcMain: ipcMain
+    }
+    // or you can use the shortcut and just say target: {win, ipcMain}
+})
+```
+
+On renderer
+
+```js
+const {ipcRenderer} = require("electron")
+
+createDefaultTransport({
+    type: "ipcRenderer",
+    target: ipcRenderer
+})
+```
+
 ## Event relaying
+
+Suppose we have 3 execution contexts, `A`, `B`, and `C`. They form the
+communication network as the image below
+
+![](imgs/abc.svg)
+
+One scenario this can happen is if `A` is the parent process and `B` and `C` are
+child processes, where each child has direct communication with its parent, but
+not among each other. In this case, it might be quite a hassle to 
+
+![](imgs/frametree.svg)
 
 ## Writing your own transport :id=custom-transport
 

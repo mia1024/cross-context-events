@@ -56,6 +56,10 @@ class Transport {
         })
     }
 
+    static clearAllEventReferences() {
+        eventsSeen.clear()
+    }
+
     static ignore(id: string) {
         eventsSeen.add(id)
     }
@@ -156,17 +160,30 @@ type ElectronWindowStub = { // typed here to avoid requiring electron for users
     webContents: { send: (channel: string, ...args: any[]) => void }
 }
 
+type ElectronIpcMainStub = { // typed here to avoid requiring electron for users
+    send: (channel: string, ...args: any[]) => void
+    on: (channel: string, ...args: any[]) => void
+}
+
+type ElectronIpcRendererStub = { // typed here to avoid requiring electron for users
+    send: (channel: string, ...args: any[]) => void
+        on: (channel: string, ...args: any[]) => void
+}
+
+
 type ElectronMainTransportOptions = {
     type: "ipcMain"
     // target: Electron.BrowserWindow
-    target: ElectronWindowStub
+    target: {
+        win: ElectronWindowStub
+        ipcMain: ElectronIpcMainStub
+    }
 }
 
 
 type ElectronRendererTransportOptions = {
     type: "ipcRenderer"
-    // target: Electron.IpcMain
-    target: { send: (channel: string, ...args: any[]) => void }
+    target: ElectronIpcRendererStub
 }
 
 type DefaultTransportOptions =
@@ -245,22 +262,26 @@ function createDefaultTransport(transportOptions: DefaultTransportOptions): Tran
                 }
             })
         case "ipcMain": { // for scoping
-            const {ipcMain} = require("electron")
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    ipcMain.on("cross-context-events", (event: any, args: TransportData) => callback(args))
+                    (target as {
+                        win: ElectronWindowStub
+                        ipcMain: ElectronIpcMainStub
+                    }).ipcMain.on("cross-context-events", (event: any, args: TransportData) => callback(args))
                 }, sending(data: TransportData) {
-                    (target as ElectronWindowStub).webContents.send("cross-context-events", data)
+                    (target as {
+                        win: ElectronWindowStub
+                        ipcMain: ElectronIpcMainStub
+                    }).win.webContents.send("cross-context-events", data)
                 }
             })
         }
         case "ipcRenderer": {
-            const {ipcRenderer} = require("electron") // runtime require so it doesn't pollute other packages
             return new Transport({
                 recving(callback: (data: TransportData) => void) {
-                    ipcRenderer.on("cross-context-events", (event: any, args: TransportData) => callback(args))
+                    (target as ElectronIpcMainStub).on("cross-context-events", (event: any, args: TransportData) => callback(args))
                 }, sending(data: TransportData) {
-                    ipcRenderer.send("cross-context-events", data)
+                    (target as ElectronIpcMainStub).send("cross-context-events", data)
                 }
             })
 

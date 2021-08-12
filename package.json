@@ -1,7 +1,7 @@
 {
   "name": "cross-context-events",
-  "version": "0.2.0",
-  "description": "A lightweight event library for cross context messaging",
+  "version": "0.2.1",
+  "description": "A lightweight event library for cross context messaging and events synchronization",
   "main": "dist/cross-context-events.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.js",
@@ -16,13 +16,21 @@
     "dist/",
     "src/"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/mia1024/cross-context-events.git"
-  },
+  "repository": "github:mia1024/cross-context-events",
   "keywords": [
     "event",
-    "events"
+    "events",
+    "context",
+    "cross-context",
+    "typescript",
+    "es6",
+    "node",
+    "worker",
+    "window",
+    "iframe",
+    "ipc",
+    "runtime",
+    "electron"
   ],
   "author": "Mia Celeste",
   "license": "MIT",
@@ -35,7 +43,6 @@
     "@types/mocha": "8",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "@typescript-eslint/parser": "^4.28.4",
-    "electron": "^13.1.9",
     "eslint": "^7.31.0",
     "expect": "^27.0.6",
     "global-jsdom": "^8.1.0",
